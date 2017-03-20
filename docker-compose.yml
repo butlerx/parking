@@ -1,0 +1,22 @@
+version: "3"
+services:
+  parking:
+    build: .
+    volumes:
+      - ./logs:/usr/src/app/logs
+
+  javac:
+    image: openjdk:8
+    container_name: parking-javac
+    command: javac Parking.java
+    working_dir: /usr/src/app
+    volumes:
+      -  $PWD:/usr/src/app
+
+  run:
+    image: openjdk:8
+    container_name: parking-java
+    command: java Parking
+    working_dir: /usr/src/app
+    volumes:
+      -  $PWD:/usr/src/app
