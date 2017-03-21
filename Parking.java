@@ -47,11 +47,11 @@ class CarPark {
 
 class Entrance extends Thread {
   private CarPark carPark;
-	private int number;
+  private int number;
 
   public Entrance (CarPark c, int i) {
     carPark = c;
-		this.number = i;
+    this.number = i;
   }
 
   public void run () {
@@ -67,18 +67,18 @@ class Entrance extends Thread {
 
 class Exit extends Thread {
   private CarPark carPark;
-	private int number;
+  private int number;
 
   public Exit (CarPark c, int i) {
     carPark = c;
-		this.number = i;
+    this.number = i;
   }
 
   public void run () {
     int value = 0;
-		for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
       value = carPark.leave();
       System.out.println("Exit #" + this.number + " got: " + value);
-		}
+    }
   }
 }
