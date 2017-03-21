@@ -19,15 +19,24 @@ public class Parking {
   }
 }
 
-class Car{
+class Car {
   private boolean considerate;
+  private int time;
 
-  public Car(boolean isConsiderate){
+  public Car (boolean isConsiderate) {
     this.considerate = isConsiderate;
   }
 
-  public boolean getConsiderate(){
-    return considerate;
+  public boolean getConsiderate () {
+    return this.considerate;
+  }
+
+  public int getTime () {
+    return this.time;
+  }
+
+  public void timePassed (int passed) {
+    this.time -= passed;
   }
 }
 
@@ -36,16 +45,16 @@ class CarPark {
   private int occupied;
   private int length;
 
-  public CarPark(int size){
+  public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
     this.occupied = 0;
     this.length = size;
   }
 
-  private void removeCar(){
+  private void removeCar () {
     int index = (int) Math.random() * occupied;
     Car leaver = spaces.get(index);
-    if(leaver.getConsiderate()){
+    if (leaver.getConsiderate()) {
       spaces.remove(index);
       occupied--;
     } else { //driver is occupying two spaces
@@ -56,7 +65,7 @@ class CarPark {
     }
   }
 
-  private int findAsshole(){
+  private int findAsshole () {
     for(int i = 0; i < spaces.size(); i++){
       Car check = spaces.get(i);
       if(!check.getConsiderate()){
@@ -66,7 +75,7 @@ class CarPark {
     return 0;
   }
 
-  public synchronized void leave() {
+  public synchronized void leave () {
     while (occupied == 0) {
       try {
         wait();
@@ -76,7 +85,7 @@ class CarPark {
     notifyAll();
   }
 
-  public synchronized void park() {
+  public synchronized void park () {
     while (occupied == this.length) {
       try {
         wait();
@@ -86,9 +95,9 @@ class CarPark {
     notifyAll();
   }
 
-  private void addCar(){
+  private void addCar () {
     int generator = (int) Math.random() * 50;
-    if(generator == 50){
+    if (generator == 50) {
       spaces.add(new Car(false));
       occupied += 2;
     } else {
