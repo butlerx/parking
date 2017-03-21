@@ -1,47 +1,104 @@
+import java.util.*;
+
 public class Parking {
 
   public static void main (String [] args) {
     CarPark multiStory = new CarPark(1000);
-    Entrance in = new Entrance(multiStory, 1);
-    in.start();
-    Exit out = new Exit(multiStory, 1);
-    out.start();
+    Entrance in1 = new Entrance(multiStory, 1);
+    Entrance in2 = new Entrance(multiStory, 2);
+    Entrance in3 = new Entrance(multiStory, 3);
+    in1.start();
+    in2.start();
+    in3.start();
+    Exit out1 = new Exit(multiStory, 1);
+    Exit out2 = new Exit(multiStory, 2);
+    Exit out3 = new Exit(multiStory, 3);
+    out1.start();
+    out2.start();
+    out3.start();
+  }
+}
+
+class Car{
+  private boolean considerate;
+
+  public Car(boolean isConsiderate){
+    this.considerate = isConsiderate;
+  }
+
+  public boolean getConsiderate(){
+    return considerate;
   }
 }
 
 class CarPark {
-  private int spaces;
-  private boolean available;
+  private ArrayList<Car> spaces;
+  private int occupied;
+  private int length;
 
-  public CarPark(int spaces){
-    this.spaces = spaces;
-    available = true;
+  public CarPark(int size){
+    this.spaces = new ArrayList<Car>();
+    this.occupied = 0;
+    this.length = size;
   }
 
-  public synchronized int leave() {
-    while (available == false) {
+  private void removeCar(){
+    int index = (int) Math.random() * occupied;
+    Car leaver = spaces.get(index);
+    if(leaver.getConsiderate()){
+      spaces.remove(index);
+      occupied--;
+    } else { //driver is occupying two spaces
+      spaces.remove(index);
+      index = findAsshole(); //we've freed one of the spaces they occupied, we must free a second
+      spaces.remove(index);
+      occupied -= 2;
+    }
+  }
+
+  private int findAsshole(){
+    for(int i = 0; i < spaces.size(); i++){
+      Car check = spaces.get(i);
+      if(!check.getConsiderate()){
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  public synchronized void leave() {
+    while (occupied == 0) {
       try {
         wait();
       } catch (InterruptedException e) {}
     }
-    available = false;
+    removeCar();
     notifyAll();
-    return spaces;
   }
 
-  public synchronized void park(int value) {
-    while (available == true) {
+  public synchronized void park() {
+    while (occupied == this.length) {
       try {
         wait();
       } catch (InterruptedException e) {}
     }
-    spaces = value;
-    available = true;
+    addCar();
     notifyAll();
+  }
+
+  private void addCar(){
+    int generator = (int) Math.random() * 50;
+    if(generator == 50){
+      spaces.add(new Car(false));
+      occupied += 2;
+    } else {
+      spaces.add(new Car(true));
+      occupied++;
+    }
   }
 
   public synchronized int getSpaces(){
-    return spaces;
+    return this.length - this.occupied;
   }
 }
 
@@ -55,9 +112,9 @@ class Entrance extends Thread {
   }
 
   public void run () {
-    for (int i = 0; i < 10; i++) {
-      carPark.park(i);
-      System.out.println("Entrance #" + this.number + " put: " + i);
+    while (true) {
+      carPark.park();
+      System.out.println("Entrance #" + this.number + " spaces: " + carPark.getSpaces());
       try {
         sleep((int)(Math.random() * 100));
       } catch (InterruptedException e) { }
@@ -75,10 +132,9 @@ class Exit extends Thread {
   }
 
   public void run () {
-    int value = 0;
-		for (int i = 0; i < 10; i++) {
-      value = carPark.leave();
-      System.out.println("Exit #" + this.number + " got: " + value);
+		while (true) {
+      carPark.leave();
+      System.out.println("Exit #" + this.number + " spaces: " + carPark.getSpaces());
 		}
   }
 }
