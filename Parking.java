@@ -4,6 +4,8 @@ public class Parking {
 
   public static void main (String [] args) {
     CarPark multiStory = new CarPark(1000);
+    Clock clock = new Clock(multiStory);
+    clock.start();
     Entrance in1 = new Entrance(multiStory, 1);
     Entrance in2 = new Entrance(multiStory, 2);
     Entrance in3 = new Entrance(multiStory, 3);
@@ -44,11 +46,20 @@ class CarPark {
   private ArrayList<Car> spaces;
   private int occupied;
   private int length;
+  private int time = 1;
 
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
     this.occupied = 0;
     this.length = size;
+  }
+
+  public int getTime () {
+    return this.time % 24;
+  }
+
+  public void passTime () {
+    this.time++;
   }
 
   private void removeCar () {
@@ -125,7 +136,25 @@ class Entrance extends Thread {
       carPark.park();
       System.out.println("Entrance #" + this.number + ", spaces left: " + carPark.getSpaces());
       try {
-        sleep((int)(Math.random() * 100));
+        sleep((int)(Math.random() * 100 * carPark.getTime()));
+      } catch (InterruptedException e) { }
+    }
+  }
+}
+class Clock extends Thread {
+  private CarPark carPark;
+
+  public Clock (CarPark c) {
+    carPark = c;
+  }
+
+  public void run () {
+    while (true) {
+      carPark.passTime();
+      System.out.println("The time is " + carPark.getTime());
+      try {
+        // Chaage to actual Time
+        sleep((int)(Math.random() * 1000));
       } catch (InterruptedException e) { }
     }
   }
@@ -145,7 +174,7 @@ class Exit extends Thread {
       carPark.leave();
       System.out.println("Exit #" + this.number + ", spaces left: " + carPark.getSpaces());
       try {
-        sleep((int)(Math.random() * 100));
+        sleep((int)(Math.random() * 100 * (24 - carPark.getTime())));
       } catch (InterruptedException e) { }
     }
   }
