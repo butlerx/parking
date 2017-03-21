@@ -1,7 +1,7 @@
 public class Parking {
 
   public static void main (String [] args) {
-    CarPark multiStory = new CarPark();
+    CarPark multiStory = new CarPark(1000);
     Entrance in = new Entrance(multiStory, 1);
     in.start();
     Exit out = new Exit(multiStory, 1);
@@ -10,8 +10,13 @@ public class Parking {
 }
 
 class CarPark {
-  private int contents;
-  private boolean available = false;
+  private int spaces;
+  private boolean available;
+
+  public CarPark(int spaces){
+    this.spaces = spaces;
+    available = true;
+  }
 
   public synchronized int leave() {
     while (available == false) {
@@ -21,7 +26,7 @@ class CarPark {
     }
     available = false;
     notifyAll();
-    return contents;
+    return spaces;
   }
 
   public synchronized void park(int value) {
@@ -30,9 +35,13 @@ class CarPark {
         wait();
       } catch (InterruptedException e) {}
     }
-    contents = value;
+    spaces = value;
     available = true;
     notifyAll();
+  }
+
+  public synchronized int getSpaces(){
+    return spaces;
   }
 }
 
