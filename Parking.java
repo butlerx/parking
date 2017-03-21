@@ -123,7 +123,7 @@ class Entrance extends Thread {
   public void run () {
     while (true) {
       carPark.park();
-      System.out.println("Entrance #" + this.number + " spaces: " + carPark.getSpaces());
+      System.out.println("Entrance #" + this.number + ", spaces left: " + carPark.getSpaces());
       try {
         sleep((int)(Math.random() * 100));
       } catch (InterruptedException e) { }
@@ -141,9 +141,12 @@ class Exit extends Thread {
   }
 
   public void run () {
-		while (true) {
+    while (true) {
       carPark.leave();
-      System.out.println("Exit #" + this.number + " spaces: " + carPark.getSpaces());
-		}
+      System.out.println("Exit #" + this.number + ", spaces left: " + carPark.getSpaces());
+      try {
+        sleep((int)(Math.random() * 100));
+      } catch (InterruptedException e) { }
+    }
   }
 }
