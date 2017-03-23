@@ -44,13 +44,17 @@ class Car {
 
 class CarPark {
   private ArrayList<Car> spaces;
+  private ArrayList<Car> waiting;
   private int occupied;
+  private int cars;
   private int length;
   private int time = 1;
 
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
+    this.waiting = new ArrayList<Car>();
     this.occupied = 0;
+    this.cars = 0;
     this.length = size;
   }
 
@@ -153,7 +157,6 @@ class Clock extends Thread {
       carPark.passTime();
       System.out.println("The time is " + carPark.getTime());
       try {
-        // Chaage to actual Time
         sleep((int)(Math.random() * 1000));
       } catch (InterruptedException e) { }
     }
@@ -172,7 +175,16 @@ class Exit extends Thread {
   public void run () {
     while (true) {
       carPark.leave();
-      System.out.println("Exit #" + this.number + ", spaces left: " + carPark.getSpaces());
+      Random delay = new Random();
+      int check = delay.nextInt(50);
+      if (check == 25) { //car is delayed, check for how long
+        int delayTime = delay.nextInt(5000);
+        try {
+          System.out.println("Exit #" + this.number + " delayed");
+          sleep(delayTime);
+        } catch (InterruptedException e) { }
+      }
+      System.out.println("Exit #" + this.number + ",     spaces left: " + carPark.getSpaces());
       try {
         sleep((int)(Math.random() * 100 * (24 - carPark.getTime())));
       } catch (InterruptedException e) { }
