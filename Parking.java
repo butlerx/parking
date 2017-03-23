@@ -42,24 +42,42 @@ class Car {
   }
 }
 
+class WaitManager {
+  private ArrayList<Car> waiting;
+  public WaitManager() {
+    this.waiting = new ArrayList<Car>();
+  }
+  public synchronized void addCar(Car visitor) {
+    waiting.add(visitor);
+  }
+  public synchronized Car removeCar() {
+    return waiting.remove(0);
+  }
+  public synchronized int getNumWaiting() {
+    return waiting.size();
+  }
+}
+
 class CarPark {
   private ArrayList<Car> spaces;
-  private ArrayList<Car> waiting;
+  private WaitManager queue;
   private int occupied;
-  private int cars;
-  private int length;
+  private int parkSize;
   private int time = 1;
 
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
-    this.waiting = new ArrayList<Car>();
+    this.queue = new WaitManager();
     this.occupied = 0;
-    this.cars = 0;
-    this.length = size;
+    this.parkSize = size;
   }
 
   public int getTime () {
     return this.time % 24;
+  }
+
+  public WaitManager getQueue() {
+    return queue;
   }
 
   public void passTime () {
@@ -80,14 +98,14 @@ class CarPark {
     }
   }
 
-  private int findAsshole () {
+  private int findAsshole () { //used to find a second space when someone is parked over two spaces
     for(int i = 0; i < spaces.size(); i++){
       Car check = spaces.get(i);
       if(!check.getConsiderate()){
         return i;
       }
     }
-    return 0;
+    return 0; //we've somehow managed to get to the end without finding the pair, remove the first car in the car park
   }
 
   public synchronized void leave () {
@@ -100,29 +118,43 @@ class CarPark {
     notifyAll();
   }
 
+  public void lookForSpace (){
+    Random generator = new Random();
+    int check = generator.nextInt(50);
+    if (check == 25) {
+      queue.addCar(new Car(false));
+    } else {
+      queue.addCar(new Car(true));
+    }
+  }
+
   public synchronized void park () {
-    while (occupied == this.length) {
+    while (occupied >= this.parkSize) {
       try {
         wait();
       } catch (InterruptedException e) {}
     }
-    addCar();
+    addCar(queue.removeCar());
     notifyAll();
   }
 
-  private void addCar () {
-    int generator = (int) Math.random() * 50;
-    if (generator == 50) {
-      spaces.add(new Car(false));
+  private void addCar (Car visitor) {
+    if (!visitor.getConsiderate()) {
+      spaces.add(visitor);
+      spaces.add(visitor); //driver is parked across two spaces
       occupied += 2;
     } else {
-      spaces.add(new Car(true));
+      spaces.add(visitor);
       occupied++;
     }
   }
 
-  public synchronized int getSpaces(){
-    return this.length - this.occupied;
+  public synchronized int getOccupied() {
+    return this.occupied;
+  }
+
+  public synchronized int getSpaces() {
+    return this.parkSize - this.occupied;
   }
 }
 
@@ -137,8 +169,9 @@ class Entrance extends Thread {
 
   public void run () {
     while (true) {
+      carPark.lookForSpace();
       carPark.park();
-      System.out.println("Entrance #" + this.number + ", spaces left: " + carPark.getSpaces());
+      System.out.println("Entrance #" + this.number + ", cars in car park: " + carPark.getOccupied());
       try {
         sleep((int)(Math.random() * 100 * carPark.getTime()));
       } catch (InterruptedException e) { }
@@ -180,11 +213,11 @@ class Exit extends Thread {
       if (check == 25) { //car is delayed, check for how long
         int delayTime = delay.nextInt(5000);
         try {
-          System.out.println("Exit #" + this.number + " delayed");
+          System.out.println("Exit #" + this.number + " delayed by " + (((int) delayTime/1000) + 1) + " seconds");
           sleep(delayTime);
         } catch (InterruptedException e) { }
       }
-      System.out.println("Exit #" + this.number + ",     spaces left: " + carPark.getSpaces());
+      System.out.println("Exit #" + this.number + ",     cars in car park: " + carPark.getOccupied());
       try {
         sleep((int)(Math.random() * 100 * (24 - carPark.getTime())));
       } catch (InterruptedException e) { }
