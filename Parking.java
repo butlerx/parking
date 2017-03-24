@@ -134,15 +134,19 @@ class Car {
 
 class WaitManager {
   private ArrayList<Car> waiting;
+
   public WaitManager() {
     this.waiting = new ArrayList<Car>();
   }
+
   public synchronized void addCar (Car visitor) {
     waiting.add(visitor);
   }
+
   public synchronized Car removeCar () {
     return waiting.remove(0);
   }
+
   public synchronized int getNumWaiting () {
     return waiting.size();
   }
@@ -151,10 +155,12 @@ class WaitManager {
 class Parker extends Thread {
   private WaitManager queue;
   private CarPark park;
+
   public Parker(WaitManager queue, CarPark park) {
     this.queue = queue;
     this.park = park;
   }
+
   public void run() {
     while(true) {
       park.park();
@@ -257,7 +263,7 @@ class CarPark {
         wait();
       } catch (InterruptedException e) {}
     }
-    if(queue.getNumWaiting() > 0) {
+    if (queue.getNumWaiting() > 0) {
       addCar(queue.removeCar());
     }
     notifyAll();
@@ -280,7 +286,7 @@ class CarPark {
   }
 
   public synchronized int getSpaces () {
-    if(this.parkSize - this.occupied < 0) {
+    if (this.parkSize - this.occupied < 0) {
       return 0;
     } else {
       return this.parkSize - this.occupied;
@@ -289,9 +295,9 @@ class CarPark {
 
   public synchronized int getParkedCars () {
     int doubleParked = 0;
-    for(int i = 0; i < spaces.size(); i++){
+    for(int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
-      if(!check.getConsiderate()){
+      if (!check.getConsiderate()) {
         doubleParked++;
       }
     }
@@ -347,6 +353,7 @@ class Clock extends Thread {
   public Clock (CarPark c) {
     carPark = c;
   }
+
   public void kill () {
     this.start = false;
   }
