@@ -62,11 +62,11 @@ public class Parking {
     controlPanel.setLayout(new FlowLayout());
 
     mainFrame.add(headerLabel);
-    mainFrame.add(controlPanel);
     mainFrame.add(spacesLabel);
     mainFrame.add(carsLabel);
     mainFrame.add(queueLabel);
     mainFrame.add(parkedLabel);
+    mainFrame.add(controlPanel);
     mainFrame.setVisible(true);
   }
 
@@ -97,21 +97,64 @@ public class Parking {
     public void actionPerformed (ActionEvent e) {
       String command = e.getActionCommand();
       if(command.equals("Run"))  {
-        clock.start();
-        in1.start();
-        in2.start();
-        in3.start();
-        wait1.start();
-        wait2.start();
-        wait3.start();
-        out1.start();
-        out2.start();
-        out3.start();
+        //if (!clock.checkRunning()) {
+          //clock.restart();
+        //} else {
+          clock.start();
+        //}
+        //if (!in1.checkRunning()) {
+          //in1.restart();
+        //} else {
+          in1.start();
+        //}
+        //if (!in2.checkRunning()) {
+          //in2.restart();
+        //} else {
+          in2.start();
+        //}
+        //if (!clock.checkRunning()) {
+          //clock.restart();
+        //} else {
+          in3.start();
+        //}
+        //if (!wait1.checkRunning()) {
+          //wait1.restart();
+        //} else {
+          wait1.start();
+        //}
+        //if (!wait2.checkRunning()) {
+          //wait2.restart();
+        //} else {
+          wait2.start();
+        //}
+        //if (!wait3.checkRunning()) {
+          //wait3.restart();
+        //} else {
+          wait3.start();
+        //}
+        //if (!out1.checkRunning()) {
+          //out1.restart();
+        //} else {
+          out1.start();
+        //}
+        //if (!out2.checkRunning()) {
+          //out2.restart();
+        //} else {
+          out2.start();
+        //}
+        //if (!out3.checkRunning()) {
+          //out3.restart();
+        //} else {
+          out3.start();
+        //}
       } else {
         clock.kill();
         in1.kill();
         in2.kill();
         in3.kill();
+        wait1.kill();
+        wait2.kill();
+        wait3.kill();
         out1.kill();
         out2.kill();
         out3.kill();
@@ -122,7 +165,6 @@ public class Parking {
 
 class Car {
   private boolean considerate;
-  private int time;
 
   public Car (boolean isConsiderate) {
     this.considerate = isConsiderate;
@@ -155,6 +197,7 @@ class WaitManager {
 
 class Parker extends Thread {
   private WaitManager queue;
+  private boolean start;
   private CarPark park;
 
   public Parker(WaitManager queue, CarPark park) {
@@ -162,7 +205,20 @@ class Parker extends Thread {
     this.park = park;
   }
 
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
   public void run() {
+    this.start = true;
     while(true) {
       park.park();
     }
@@ -203,7 +259,7 @@ class CarPark {
 
   public void passTime () {
     this.time++;
-    if (this.time % 60 == 0) {
+    if (this.time % 6 == 0) {
       this.hour++;
     }
   }
@@ -313,11 +369,19 @@ class CarPark {
 class Entrance extends Thread {
   private CarPark carPark;
   private int number;
-  private boolean start = true;
+  private boolean start;
 
   public Entrance (CarPark c, int i) {
     carPark = c;
     this.number = i;
+  }
+
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
   }
 
   public void kill () {
@@ -355,6 +419,14 @@ class Clock extends Thread {
     carPark = c;
   }
 
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
   public void kill () {
     this.start = false;
   }
@@ -380,6 +452,14 @@ class Exit extends Thread {
   public Exit (CarPark c, int i) {
     carPark = c;
     this.number = i;
+  }
+
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
   }
 
   public void kill () {
