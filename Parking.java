@@ -47,11 +47,9 @@ class WaitManager {
     this.waiting = new ArrayList<Car>();
   }
   public synchronized void addCar(Car visitor) {
-    System.err.println("Adding car to waitlist");
     waiting.add(visitor);
   }
   public synchronized Car removeCar() {
-    System.err.println("Found a space");
     return waiting.remove(0);
   }
   public synchronized int getNumWaiting() {
@@ -165,7 +163,6 @@ class CarPark {
   public synchronized void park () {
     while (occupied >= this.parkSize) {
       try {
-        System.err.println("Waiting for a space to become free");
         wait();
       } catch (InterruptedException e) {}
     }
