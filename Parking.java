@@ -4,6 +4,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.text.DecimalFormat;
 import javax.swing.Timer;
+import java.util.stream.IntStream;
 
 public class Parking {
 
@@ -98,10 +99,8 @@ public class Parking {
       String command = e.getActionCommand();
       if(command.equals("Run"))  {
         if (clock.isAlive()) {
-          System.out.println("resatrt");
           clock.restart();
         } else {
-          System.out.println("satrt");
           clock.start();
         }
         if (in1.isAlive()) {
@@ -218,7 +217,6 @@ class Parker extends Thread {
   public void run() {
     this.start = true;
     while (true) {
-      System.out.println(this.start);
       if (this.start) {
         park.park();
       }
@@ -232,8 +230,10 @@ class CarPark {
   private int occupied;
   private int parkSize;
   // Time is 10 minute
-  private int time = 1;
+  private int time = 0;
   private int hour = 0;
+  private int[] morningRush = {7, 8, 9};
+  private int[] eveningRush = {17, 18, 19};
 
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
@@ -263,6 +263,14 @@ class CarPark {
     if (this.time % 6 == 0) {
       this.hour++;
     }
+  }
+
+  public boolean isMorningRush () {
+    return IntStream.of(this.morningRush).anyMatch(x -> x == this.hour);
+  }
+
+  public boolean isEveningRush () {
+    return IntStream.of(this.eveningRush).anyMatch(x -> x == this.hour);
   }
 
   private void removeCar () {
@@ -388,7 +396,6 @@ class Entrance extends Thread {
   public void run () {
     this.start = true;
     while (true) {
-      System.out.println(this.start);
       if (this.start) {
         if (carPark.getTotalCars() > carPark.getSize()) {
           // More cars than spaces
@@ -403,8 +410,16 @@ class Entrance extends Thread {
           carPark.lookForSpace();
         }
         Random rand = new Random();
+        int sleep;
+        if (carPark.isMorningRush()) {
+          sleep = (rand.nextInt(150) + 1);
+        } else if (carPark.isEveningRush()) {
+          sleep = 1000 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        } else {
+          sleep = 100 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        }
         try {
-          sleep(Math.abs((100 * (rand.nextInt(carPark.getHour() + 1) + 1)) - 50));
+          sleep(Math.abs(sleep));
         } catch (InterruptedException e) { }
       }
     }
@@ -430,7 +445,6 @@ class Clock extends Thread {
   public void run () {
     this.start = true;
     while (true) {
-      System.out.println(this.start);
       if (this.start) {
         carPark.passTime();
         try {
@@ -464,7 +478,6 @@ class Exit extends Thread {
   public void run () {
     this.start = true;
     while (true) {
-      System.out.println(this.start);
       if (this.start) {
         carPark.leave();
         Random delay = new Random();
@@ -476,8 +489,16 @@ class Exit extends Thread {
             sleep(delayTime);
           } catch (InterruptedException e) { }
         }
+        int sleep;
+        if (carPark.isEveningRush()) {
+          sleep = (delay.nextInt(150) + 1);
+        } else if (carPark.isEveningRush()) {
+          sleep = 1000 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        } else {
+          sleep = 100 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        }
         try {
-          sleep(Math.abs((100 * (delay.nextInt(24 - carPark.getHour()) + 1)) + 50));
+          sleep(sleep);
         } catch (InterruptedException e) { }
       }
     }
