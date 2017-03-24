@@ -9,6 +9,8 @@ public class Parking {
   private JLabel headerLabel;
   private JLabel spacesLabel;
   private JLabel carsLabel;
+  private JLabel parkedLabel;
+  private JLabel queueLabel;
   private JPanel controlPanel;
   private CarPark multiStory = new CarPark(1000);
 
@@ -29,8 +31,12 @@ public class Parking {
     headerLabel = new JLabel("CarPark",JLabel.CENTER );
     carsLabel = new JLabel("",JLabel.CENTER);
     spacesLabel = new JLabel("",JLabel.CENTER);
+    queueLabel = new JLabel("",JLabel.CENTER);
+    parkedLabel = new JLabel("",JLabel.CENTER);
     spacesLabel.setSize(350,100);
     carsLabel.setSize(350,100);
+    queueLabel.setSize(350,100);
+    parkedLabel.setSize(350,100);
 
     mainFrame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowEvent){
@@ -44,6 +50,8 @@ public class Parking {
     mainFrame.add(controlPanel);
     mainFrame.add(spacesLabel);
     mainFrame.add(carsLabel);
+    mainFrame.add(queueLabel);
+    mainFrame.add(parkedLabel);
     mainFrame.setVisible(true);
   }
 
@@ -65,6 +73,8 @@ public class Parking {
       //System.out.printf("The time is %02d:%02d%n", multiStory.getHour(), multiStory.getTime() * 10);
       carsLabel.setText("There are currently " + multiStory.getNumCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
+      parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
+      queueLabel.setText("There are currently " + multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
     }
   }
 
@@ -167,6 +177,10 @@ class CarPark {
     this.parkSize = size;
   }
 
+  public int getSize () {
+    return this.parkSize;
+  }
+
   public int getTime () {
     return this.time % 6;
   }
@@ -266,10 +280,14 @@ class CarPark {
   }
 
   public synchronized int getSpaces () {
-    return this.parkSize - this.occupied;
+    if(this.parkSize - this.occupied < 0) {
+      return 0;
+    } else {
+      return this.parkSize - this.occupied;
+    }
   }
 
-  public synchronized int getNumCars () {
+  public synchronized int getParkedCars () {
     int doubleParked = 0;
     for(int i = 0; i < spaces.size(); i++){
       Car check = spaces.get(i);
@@ -278,6 +296,10 @@ class CarPark {
       }
     }
     return this.occupied - (doubleParked / 2);
+  }
+
+  public synchronized int getTotalCars () {
+    return getParkedCars() + queue.getNumWaiting();
   }
 }
 
@@ -298,11 +320,21 @@ class Entrance extends Thread {
   public void run () {
     this.start = true;
     while (this.start) {
-      carPark.lookForSpace();
-      //carPark.park();
+      if (carPark.getTotalCars() > carPark.getSize()) {
+        //more cars than spaces
+        int overflow = carPark.getTotalCars() - carPark.getSize();
+        float entryChance = 1/overflow;
+        Random gate = new Random();
+        if(entryChance > gate.nextFloat()) {
+          //chance of entry decreases the more overflow there is
+          carPark.lookForSpace();
+        }
+      } else {
+        carPark.lookForSpace();
+      }
       Random rand = new Random();
       try {
-        sleep((100 * (rand.nextInt(carPark.getHour() + 1) + 1)));
+        sleep(Math.abs((100 * (rand.nextInt(carPark.getHour() + 1) + 1)) - 50));
       } catch (InterruptedException e) { }
     }
   }
@@ -359,7 +391,7 @@ class Exit extends Thread {
         } catch (InterruptedException e) { }
       }
       try {
-        sleep((100 * (delay.nextInt(24 - carPark.getHour()) + 1)));
+        sleep(Math.abs((100 * (delay.nextInt(24 - carPark.getHour()) + 1)) + 50));
       } catch (InterruptedException e) { }
     }
   }
