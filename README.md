@@ -3,9 +3,9 @@
 ## Docker
 Compile in docker
 ```
-docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp openjdk:8 javac Parking.java
+docker-compose up javac
 ```
 Running in docker
 ```
-docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp openjdk:8 java Parking
+docker-compose up run
 ```

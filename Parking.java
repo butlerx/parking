@@ -18,6 +18,7 @@ public class Parking {
     out1.start();
     out2.start();
     out3.start();
+    (new Thread(new Dashboard(multiStory))).start();
   }
 }
 
@@ -31,14 +32,6 @@ class Car {
 
   public boolean getConsiderate () {
     return this.considerate;
-  }
-
-  public int getTime () {
-    return this.time;
-  }
-
-  public void timePassed (int passed) {
-    this.time -= passed;
   }
 }
 
@@ -90,22 +83,27 @@ class CarPark {
     if (leaver.getConsiderate()) {
       spaces.remove(index);
       occupied--;
-    } else { //driver is occupying two spaces
+    } else {
+      // Driver is occupying two spaces
       spaces.remove(index);
-      index = findAsshole(); //we've freed one of the spaces they occupied, we must free a second
+      // We've freed one of the spaces they occupied, we must free a second
+      index = findAsshole();
       spaces.remove(index);
       occupied -= 2;
     }
   }
 
-  private int findAsshole () { //used to find a second space when someone is parked over two spaces
+  // Used to find a second space when someone is parked over two spaces
+  private int findAsshole () {
     for(int i = 0; i < spaces.size(); i++){
       Car check = spaces.get(i);
       if(!check.getConsiderate()){
         return i;
       }
     }
-    return 0; //we've somehow managed to get to the end without finding the pair, remove the first car in the car park
+    // We've somehow managed to get to the end without finding the pair,
+    // remove the first car in the car park
+    return 0;
   }
 
   public synchronized void leave () {
@@ -140,8 +138,9 @@ class CarPark {
 
   private void addCar (Car visitor) {
     if (!visitor.getConsiderate()) {
+      // Driver is parked across two spaces
       spaces.add(visitor);
-      spaces.add(visitor); //driver is parked across two spaces
+      spaces.add(visitor);
       occupied += 2;
     } else {
       spaces.add(visitor);
@@ -149,12 +148,23 @@ class CarPark {
     }
   }
 
-  public synchronized int getOccupied() {
+  public synchronized int getOccupied () {
     return this.occupied;
   }
 
-  public synchronized int getSpaces() {
+  public synchronized int getSpaces () {
     return this.parkSize - this.occupied;
+  }
+
+  public synchronized int getNumCars () {
+    int doubleParked = 0;
+    for(int i = 0; i < spaces.size(); i++){
+      Car check = spaces.get(i);
+      if(!check.getConsiderate()){
+        doubleParked++;
+      }
+    }
+    return this.occupied - (doubleParked / 2);
   }
 }
 
@@ -171,7 +181,6 @@ class Entrance extends Thread {
     while (true) {
       carPark.lookForSpace();
       carPark.park();
-      System.out.println("Entrance #" + this.number + ", cars in car park: " + carPark.getOccupied());
       try {
         sleep((int)(Math.random() * 100 * carPark.getTime()));
       } catch (InterruptedException e) { }
@@ -188,7 +197,6 @@ class Clock extends Thread {
   public void run () {
     while (true) {
       carPark.passTime();
-      System.out.println("The time is " + carPark.getTime());
       try {
         sleep((int)(Math.random() * 1000));
       } catch (InterruptedException e) { }
@@ -210,17 +218,37 @@ class Exit extends Thread {
       carPark.leave();
       Random delay = new Random();
       int check = delay.nextInt(50);
-      if (check == 25) { //car is delayed, check for how long
+      if (check == 25) {
+        // Car is delayed, check for how long
         int delayTime = delay.nextInt(5000);
         try {
-          System.out.println("Exit #" + this.number + " delayed by " + (((int) delayTime/1000) + 1) + " seconds");
           sleep(delayTime);
         } catch (InterruptedException e) { }
       }
-      System.out.println("Exit #" + this.number + ",     cars in car park: " + carPark.getOccupied());
       try {
         sleep((int)(Math.random() * 100 * (24 - carPark.getTime())));
       } catch (InterruptedException e) { }
+    }
+  }
+}
+
+class Dashboard extends Thread {
+  private CarPark carPark;
+
+  public Dashboard (CarPark c) {
+    carPark = c;
+  }
+
+  public void run () {
+    while (true) {
+      System.out.print("\033[H\033[2J");
+      System.out.flush();
+      System.out.println("The time is " + carPark.getTime());
+      System.out.println("There are currently " + carPark.getNumCars() + " Cars in the Carpark");
+      System.out.println("There are currently " + carPark.getSpaces() + " Spaces in the Carpark");
+      try {
+        Thread.sleep(1000);
+      } catch(InterruptedException e) {}
     }
   }
 }
