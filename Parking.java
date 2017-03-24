@@ -2,6 +2,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.Timer;
 
 public class Parking {
 
@@ -65,18 +66,18 @@ public class Parking {
     controlPanel.add(runButton);
     controlPanel.add(stopButton);
     mainFrame.setVisible(true);
-    stats();
+    stats.start();
   }
 
-  private void stats () {
-    while(true) {
+  Timer stats = new Timer(1000, new ActionListener () {
+    public void actionPerformed(ActionEvent e) {
       //System.out.printf("The time is %02d:%02d%n", multiStory.getHour(), multiStory.getTime() * 10);
       carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
       parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
       queueLabel.setText("There are currently " + multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
     }
-  }
+  });
 
   private class ButtonClickListener implements ActionListener {
     public void actionPerformed (ActionEvent e) {
