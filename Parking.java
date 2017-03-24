@@ -1,36 +1,170 @@
 import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.text.DecimalFormat;
+import javax.swing.Timer;
 
 public class Parking {
 
+  private JFrame mainFrame;
+  private JLabel headerLabel;
+  private JLabel spacesLabel;
+  private JLabel carsLabel;
+  private JLabel parkedLabel;
+  private JLabel queueLabel;
+  private JPanel controlPanel;
+  private CarPark multiStory = new CarPark(1000);
+
+  static DecimalFormat df = new DecimalFormat("00");
+
+  private Clock clock = new Clock(multiStory);
+  private Entrance in1 = new Entrance(multiStory, 1);
+  private Entrance in2 = new Entrance(multiStory, 2);
+  private Entrance in3 = new Entrance(multiStory, 3);
+  private Exit out1 = new Exit(multiStory, 1);
+  private Exit out2 = new Exit(multiStory, 2);
+  private Exit out3 = new Exit(multiStory, 3);
+  private Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
+  private Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
+  private Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
+
+  public Parking () {
+    prepareGUI();
+  }
+
   public static void main (String [] args) {
-    CarPark multiStory = new CarPark(1000);
-    Clock clock = new Clock(multiStory);
-    clock.start();
-    Entrance in1 = new Entrance(multiStory, 1);
-    Entrance in2 = new Entrance(multiStory, 2);
-    Entrance in3 = new Entrance(multiStory, 3);
-    in1.start();
-    in2.start();
-    in3.start();
-    Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
-    Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
-    Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
-    wait1.start();
-    wait2.start();
-    wait3.start();
-    Exit out1 = new Exit(multiStory, 1);
-    Exit out2 = new Exit(multiStory, 2);
-    Exit out3 = new Exit(multiStory, 3);
-    out1.start();
-    out2.start();
-    out3.start();
-    (new Thread(new Dashboard(multiStory))).start();
+    Parking swingControlDemo = new Parking();
+    swingControlDemo.showDashboard();
+  }
+
+  private void prepareGUI () {
+    mainFrame = new JFrame("Carpark");
+    mainFrame.setSize(400,400);
+    mainFrame.setLayout(new GridLayout(4, 1));
+
+    headerLabel = new JLabel("CarPark",JLabel.CENTER );
+    carsLabel = new JLabel("",JLabel.CENTER);
+    spacesLabel = new JLabel("",JLabel.CENTER);
+    queueLabel = new JLabel("",JLabel.CENTER);
+    parkedLabel = new JLabel("",JLabel.CENTER);
+    spacesLabel.setSize(350,100);
+    carsLabel.setSize(350,100);
+    queueLabel.setSize(350,100);
+    parkedLabel.setSize(350,100);
+
+    mainFrame.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent windowEvent){
+        System.exit(0);
+      }
+    });
+    controlPanel = new JPanel();
+    controlPanel.setLayout(new FlowLayout());
+
+    mainFrame.add(headerLabel);
+    mainFrame.add(spacesLabel);
+    mainFrame.add(carsLabel);
+    mainFrame.add(queueLabel);
+    mainFrame.add(parkedLabel);
+    mainFrame.add(controlPanel);
+    mainFrame.setVisible(true);
+  }
+
+  private void showDashboard () {
+    JButton runButton = new JButton("Run");
+    JButton stopButton = new JButton("Stop");
+    runButton.setActionCommand("Run");
+    stopButton.setActionCommand("Stop");
+    runButton.addActionListener(new ButtonClickListener());
+    stopButton.addActionListener(new ButtonClickListener());
+    controlPanel.add(runButton);
+    controlPanel.add(stopButton);
+    mainFrame.setVisible(true);
+    stats.start();
+  }
+
+  Timer stats = new Timer(1000, new ActionListener () {
+    public void actionPerformed(ActionEvent e) {
+      headerLabel.setText("The time in the CarPark is " + df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime()));
+      carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
+      spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
+      parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
+      queueLabel.setText("There are currently " + multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
+    }
+  });
+
+  private class ButtonClickListener implements ActionListener {
+    public void actionPerformed (ActionEvent e) {
+      String command = e.getActionCommand();
+      if(command.equals("Run"))  {
+        //if (!clock.checkRunning()) {
+          //clock.restart();
+        //} else {
+          clock.start();
+        //}
+        //if (!in1.checkRunning()) {
+          //in1.restart();
+        //} else {
+          in1.start();
+        //}
+        //if (!in2.checkRunning()) {
+          //in2.restart();
+        //} else {
+          in2.start();
+        //}
+        //if (!clock.checkRunning()) {
+          //clock.restart();
+        //} else {
+          in3.start();
+        //}
+        //if (!wait1.checkRunning()) {
+          //wait1.restart();
+        //} else {
+          wait1.start();
+        //}
+        //if (!wait2.checkRunning()) {
+          //wait2.restart();
+        //} else {
+          wait2.start();
+        //}
+        //if (!wait3.checkRunning()) {
+          //wait3.restart();
+        //} else {
+          wait3.start();
+        //}
+        //if (!out1.checkRunning()) {
+          //out1.restart();
+        //} else {
+          out1.start();
+        //}
+        //if (!out2.checkRunning()) {
+          //out2.restart();
+        //} else {
+          out2.start();
+        //}
+        //if (!out3.checkRunning()) {
+          //out3.restart();
+        //} else {
+          out3.start();
+        //}
+      } else {
+        clock.kill();
+        in1.kill();
+        in2.kill();
+        in3.kill();
+        wait1.kill();
+        wait2.kill();
+        wait3.kill();
+        out1.kill();
+        out2.kill();
+        out3.kill();
+      }
+    }
   }
 }
 
 class Car {
   private boolean considerate;
-  private int time;
 
   public Car (boolean isConsiderate) {
     this.considerate = isConsiderate;
@@ -43,28 +177,48 @@ class Car {
 
 class WaitManager {
   private ArrayList<Car> waiting;
+
   public WaitManager() {
     this.waiting = new ArrayList<Car>();
   }
-  public synchronized void addCar(Car visitor) {
+
+  public synchronized void addCar (Car visitor) {
     waiting.add(visitor);
   }
-  public synchronized Car removeCar() {
+
+  public synchronized Car removeCar () {
     return waiting.remove(0);
   }
-  public synchronized int getNumWaiting() {
+
+  public synchronized int getNumWaiting () {
     return waiting.size();
   }
 }
 
 class Parker extends Thread {
   private WaitManager queue;
+  private boolean start;
   private CarPark park;
+
   public Parker(WaitManager queue, CarPark park) {
     this.queue = queue;
     this.park = park;
   }
+
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
   public void run() {
+    this.start = true;
     while(true) {
       park.park();
     }
@@ -92,7 +246,7 @@ class CarPark {
   }
 
   public int getTime () {
-    return this.time % 6;
+    return (this.time % 6) * 10;
   }
 
   public int getHour () {
@@ -166,7 +320,7 @@ class CarPark {
         wait();
       } catch (InterruptedException e) {}
     }
-    if(queue.getNumWaiting() > 0) {
+    if (queue.getNumWaiting() > 0) {
       addCar(queue.removeCar());
     }
     notifyAll();
@@ -189,7 +343,7 @@ class CarPark {
   }
 
   public synchronized int getSpaces () {
-    if(this.parkSize - this.occupied < 0) {
+    if (this.parkSize - this.occupied < 0) {
       return 0;
     } else {
       return this.parkSize - this.occupied;
@@ -198,9 +352,9 @@ class CarPark {
 
   public synchronized int getParkedCars () {
     int doubleParked = 0;
-    for(int i = 0; i < spaces.size(); i++){
+    for(int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
-      if(!check.getConsiderate()){
+      if (!check.getConsiderate()) {
         doubleParked++;
       }
     }
@@ -215,21 +369,35 @@ class CarPark {
 class Entrance extends Thread {
   private CarPark carPark;
   private int number;
+  private boolean start;
 
   public Entrance (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       if (carPark.getTotalCars() > carPark.getSize()) {
-        //more cars than spaces
+        // More cars than spaces
         int overflow = carPark.getTotalCars() - carPark.getSize();
-        float entryChance = 1/overflow;
+        float entryChance = 1 / overflow;
         Random gate = new Random();
         if(entryChance > gate.nextFloat()) {
-          //chance of entry decreases the more overflow there is
+          // Chance of entry decreases the more overflow there is
           carPark.lookForSpace();
         }
       } else {
@@ -242,15 +410,30 @@ class Entrance extends Thread {
     }
   }
 }
+
 class Clock extends Thread {
   private CarPark carPark;
+  private boolean start;
 
   public Clock (CarPark c) {
     carPark = c;
   }
 
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       carPark.passTime();
       try {
         // 1000 is 1 second real time
@@ -264,14 +447,28 @@ class Clock extends Thread {
 class Exit extends Thread {
   private CarPark carPark;
   private int number;
+  private boolean start;
 
   public Exit (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  public boolean checkRunning () {
+    return start;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       carPark.leave();
       Random delay = new Random();
       int check = delay.nextInt(50);
@@ -285,30 +482,6 @@ class Exit extends Thread {
       try {
         sleep(Math.abs((100 * (delay.nextInt(24 - carPark.getHour()) + 1)) + 50));
       } catch (InterruptedException e) { }
-    }
-  }
-}
-
-class Dashboard extends Thread {
-  private CarPark carPark;
-
-  public Dashboard (CarPark c) {
-    carPark = c;
-  }
-
-  public void run () {
-    while (true) {
-      System.out.print("\033[H\033[2J");
-      System.out.flush();
-      System.out.printf("The time is %02d:%02d%n", carPark.getHour(), carPark.getTime() * 10);
-      System.out.println("There are currently " + carPark.getTotalCars() + " Cars in the Carpark");
-      System.out.println("There are currently " + carPark.getSpaces() + " Spaces in the Carpark");
-      System.out.println("There are currently " + carPark.getParkedCars() + " Cars parked");
-      System.out.println("There are currently " + carPark.getQueue().getNumWaiting() + " Cars searching for a space");
-
-      try {
-        Thread.sleep(1000);
-      } catch(InterruptedException e) {}
     }
   }
 }
