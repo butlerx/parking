@@ -364,24 +364,3 @@ class Exit extends Thread {
     }
   }
 }
-
-class Dashboard extends Thread {
-  private CarPark carPark;
-
-  public Dashboard (CarPark c) {
-    carPark = c;
-  }
-
-  public void run () {
-    while (true) {
-      System.out.print("\033[H\033[2J");
-      System.out.flush();
-      System.out.printf("The time is %02d:%02d%n", carPark.getHour(), carPark.getTime() * 10);
-      System.out.println("There are currently " + carPark.getNumCars() + " Cars in the Carpark");
-      System.out.println("There are currently " + carPark.getSpaces() + " Spaces in the Carpark");
-      try {
-        Thread.sleep(1000);
-      } catch(InterruptedException e) {}
-    }
-  }
-}
