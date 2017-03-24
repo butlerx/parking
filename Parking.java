@@ -2,6 +2,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.text.DecimalFormat;
 import javax.swing.Timer;
 
 public class Parking {
@@ -14,6 +15,8 @@ public class Parking {
   private JLabel queueLabel;
   private JPanel controlPanel;
   private CarPark multiStory = new CarPark(1000);
+
+  static DecimalFormat df = new DecimalFormat("00");
 
   public Parking () {
     prepareGUI();
@@ -71,7 +74,7 @@ public class Parking {
 
   Timer stats = new Timer(1000, new ActionListener () {
     public void actionPerformed(ActionEvent e) {
-      //System.out.printf("The time is %02d:%02d%n", multiStory.getHour(), multiStory.getTime() * 10);
+      headerLabel.setText("The time in the CarPark is " + df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime() * 10));
       carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
       parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
