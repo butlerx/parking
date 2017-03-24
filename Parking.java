@@ -89,6 +89,10 @@ class CarPark {
     this.parkSize = size;
   }
 
+  public int getSize () {
+    return this.parkSize;
+  }
+
   public int getTime () {
     return this.time % 6;
   }
@@ -188,10 +192,14 @@ class CarPark {
   }
 
   public synchronized int getSpaces () {
-    return this.parkSize - this.occupied;
+    if(this.parkSize - this.occupied < 0) {
+      return 0;
+    } else {
+      return this.parkSize - this.occupied;
+    }
   }
 
-  public synchronized int getNumCars () {
+  public synchronized int getParkedCars () {
     int doubleParked = 0;
     for(int i = 0; i < spaces.size(); i++){
       Car check = spaces.get(i);
@@ -200,6 +208,10 @@ class CarPark {
       }
     }
     return this.occupied - (doubleParked / 2);
+  }
+
+  public synchronized int getTotalCars () {
+    return getParkedCars() + queue.getNumWaiting();
   }
 }
 
@@ -214,11 +226,21 @@ class Entrance extends Thread {
 
   public void run () {
     while (true) {
-      carPark.lookForSpace();
-      //carPark.park();
+      if (carPark.getTotalCars() > carPark.getSize()) {
+        //more cars than spaces
+        int overflow = carPark.getTotalCars() - carPark.getSize();
+        float entryChance = 1/overflow;
+        Random gate = new Random();
+        if(entryChance > gate.nextFloat()) {
+          //chance of entry decreases the more overflow there is
+          carPark.lookForSpace();
+        }
+      } else {
+        carPark.lookForSpace();
+      }
       Random rand = new Random();
       try {
-        sleep((100 * (rand.nextInt(carPark.getHour() + 1) + 1)));
+        sleep(Math.abs((100 * (rand.nextInt(carPark.getHour() + 1) + 1)) - 50));
       } catch (InterruptedException e) { }
     }
   }
@@ -264,7 +286,7 @@ class Exit extends Thread {
         } catch (InterruptedException e) { }
       }
       try {
-        sleep((100 * (delay.nextInt(24 - carPark.getHour()) + 1)));
+        sleep(Math.abs((100 * (delay.nextInt(24 - carPark.getHour()) + 1)) + 50));
       } catch (InterruptedException e) { }
     }
   }
@@ -282,8 +304,11 @@ class Dashboard extends Thread {
       System.out.print("\033[H\033[2J");
       System.out.flush();
       System.out.printf("The time is %02d:%02d%n", carPark.getHour(), carPark.getTime() * 10);
-      System.out.println("There are currently " + carPark.getNumCars() + " Cars in the Carpark");
+      System.out.println("There are currently " + carPark.getTotalCars() + " Cars in the Carpark");
       System.out.println("There are currently " + carPark.getSpaces() + " Spaces in the Carpark");
+      System.out.println("There are currently " + carPark.getParkedCars() + " Cars parked");
+      System.out.println("There are currently " + carPark.getQueue().getNumWaiting() + " Cars searching for a space");
+
       try {
         Thread.sleep(1000);
       } catch(InterruptedException e) {}
