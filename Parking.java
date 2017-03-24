@@ -55,7 +55,6 @@ class WaitManager {
     return waiting.remove(0);
   }
   public synchronized int getNumWaiting() {
-    System.err.println("Number in queue is: " + waiting.size());
     return waiting.size();
   }
 }
@@ -69,9 +68,7 @@ class Parker extends Thread {
   }
   public void run() {
     while(true) {
-      if(queue.getNumWaiting() > 0) {
-        park.park();
-      }
+      park.park();
     }
   }
 }
@@ -168,7 +165,9 @@ class CarPark {
         wait();
       } catch (InterruptedException e) {}
     }
-    addCar(queue.removeCar());
+    if(queue.getNumWaiting() > 0) {
+      addCar(queue.removeCar());
+    }
     notifyAll();
   }
 
