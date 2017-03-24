@@ -18,6 +18,17 @@ public class Parking {
 
   static DecimalFormat df = new DecimalFormat("00");
 
+  private Clock clock = new Clock(multiStory);
+  private Entrance in1 = new Entrance(multiStory, 1);
+  private Entrance in2 = new Entrance(multiStory, 2);
+  private Entrance in3 = new Entrance(multiStory, 3);
+  private Exit out1 = new Exit(multiStory, 1);
+  private Exit out2 = new Exit(multiStory, 2);
+  private Exit out3 = new Exit(multiStory, 3);
+  private Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
+  private Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
+  private Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
+
   public Parking () {
     prepareGUI();
   }
@@ -84,18 +95,8 @@ public class Parking {
 
   private class ButtonClickListener implements ActionListener {
     public void actionPerformed (ActionEvent e) {
-      Clock clock = new Clock(multiStory);
-      Entrance in1 = new Entrance(multiStory, 1);
-      Entrance in2 = new Entrance(multiStory, 2);
-      Entrance in3 = new Entrance(multiStory, 3);
-      Exit out1 = new Exit(multiStory, 1);
-      Exit out2 = new Exit(multiStory, 2);
-      Exit out3 = new Exit(multiStory, 3);
-      Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
-      Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
-      Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
       String command = e.getActionCommand();
-      if( command.equals( "Run" ))  {
+      if(command.equals("Run"))  {
         clock.start();
         in1.start();
         in2.start();
