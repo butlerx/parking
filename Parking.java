@@ -12,6 +12,12 @@ public class Parking {
     in1.start();
     in2.start();
     in3.start();
+    Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
+    Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
+    Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
+    wait1.start();
+    wait2.start();
+    wait3.start();
     Exit out1 = new Exit(multiStory, 1);
     Exit out2 = new Exit(multiStory, 2);
     Exit out3 = new Exit(multiStory, 3);
@@ -41,13 +47,32 @@ class WaitManager {
     this.waiting = new ArrayList<Car>();
   }
   public synchronized void addCar(Car visitor) {
+    System.err.println("Adding car to waitlist");
     waiting.add(visitor);
   }
   public synchronized Car removeCar() {
+    System.err.println("Found a space");
     return waiting.remove(0);
   }
   public synchronized int getNumWaiting() {
+    System.err.println("Number in queue is: " + waiting.size());
     return waiting.size();
+  }
+}
+
+class Parker extends Thread {
+  private WaitManager queue;
+  private CarPark park;
+  public Parker(WaitManager queue, CarPark park) {
+    this.queue = queue;
+    this.park = park;
+  }
+  public void run() {
+    while(true) {
+      if(queue.getNumWaiting() > 0) {
+        park.park();
+      }
+    }
   }
 }
 
@@ -70,7 +95,7 @@ class CarPark {
   }
 
   public WaitManager getQueue() {
-    return queue;
+    return this.queue;
   }
 
   public void passTime () {
@@ -116,7 +141,7 @@ class CarPark {
     notifyAll();
   }
 
-  public void lookForSpace (){
+  public synchronized void lookForSpace (){
     Random generator = new Random();
     int check = generator.nextInt(50);
     if (check == 25) {
@@ -129,6 +154,7 @@ class CarPark {
   public synchronized void park () {
     while (occupied >= this.parkSize) {
       try {
+        System.err.println("Waiting for a space to become free");
         wait();
       } catch (InterruptedException e) {}
     }
@@ -180,7 +206,7 @@ class Entrance extends Thread {
   public void run () {
     while (true) {
       carPark.lookForSpace();
-      carPark.park();
+      //carPark.park();
       try {
         sleep((int)(Math.random() * 100 * carPark.getTime()));
       } catch (InterruptedException e) { }
