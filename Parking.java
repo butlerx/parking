@@ -71,7 +71,7 @@ public class Parking {
   private void stats () {
     while(true) {
       //System.out.printf("The time is %02d:%02d%n", multiStory.getHour(), multiStory.getTime() * 10);
-      carsLabel.setText("There are currently " + multiStory.getNumCars() + " Cars in the Carpark");
+      carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
       parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
       queueLabel.setText("There are currently " + multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
