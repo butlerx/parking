@@ -77,12 +77,18 @@ public class Parking {
       Exit out1 = new Exit(multiStory, 1);
       Exit out2 = new Exit(multiStory, 2);
       Exit out3 = new Exit(multiStory, 3);
+      Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
+      Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
+      Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
       String command = e.getActionCommand();
       if( command.equals( "Run" ))  {
         clock.start();
         in1.start();
         in2.start();
         in3.start();
+        wait1.start();
+        wait2.start();
+        wait3.start();
         out1.start();
         out2.start();
         out3.start();
@@ -119,13 +125,29 @@ class WaitManager {
     this.waiting = new ArrayList<Car>();
   }
   public synchronized void addCar(Car visitor) {
+    System.err.println("Adding car to waitlist");
     waiting.add(visitor);
   }
   public synchronized Car removeCar() {
+    System.err.println("Found a space");
     return waiting.remove(0);
   }
   public synchronized int getNumWaiting() {
     return waiting.size();
+  }
+}
+
+class Parker extends Thread {
+  private WaitManager queue;
+  private CarPark park;
+  public Parker(WaitManager queue, CarPark park) {
+    this.queue = queue;
+    this.park = park;
+  }
+  public void run() {
+    while(true) {
+      park.park();
+    }
   }
 }
 
@@ -154,7 +176,7 @@ class CarPark {
   }
 
   public WaitManager getQueue() {
-    return queue;
+    return this.queue;
   }
 
   public void passTime () {
@@ -204,7 +226,7 @@ class CarPark {
     notifyAll();
   }
 
-  public void lookForSpace (){
+  public synchronized void lookForSpace (){
     Random generator = new Random();
     int check = generator.nextInt(50);
     if (check == 25) {
@@ -217,10 +239,13 @@ class CarPark {
   public synchronized void park () {
     while (occupied >= this.parkSize) {
       try {
+        System.err.println("Waiting for a space to become free");
         wait();
       } catch (InterruptedException e) {}
     }
-    addCar(queue.removeCar());
+    if(queue.getNumWaiting() > 0) {
+      addCar(queue.removeCar());
+    }
     notifyAll();
   }
 
@@ -274,7 +299,7 @@ class Entrance extends Thread {
     this.start = true;
     while (this.start) {
       carPark.lookForSpace();
-      carPark.park();
+      //carPark.park();
       Random rand = new Random();
       try {
         sleep((100 * (rand.nextInt(carPark.getHour() + 1) + 1)));
