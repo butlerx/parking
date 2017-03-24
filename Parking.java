@@ -86,11 +86,17 @@ public class Parking {
 
   Timer stats = new Timer(1000, new ActionListener () {
     public void actionPerformed(ActionEvent e) {
-      headerLabel.setText("The time in the CarPark is " + df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime()));
-      carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
-      spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
-      parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
-      queueLabel.setText("There are currently " + multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
+      headerLabel.setText("The time in the CarPark is " +
+        df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime())
+      );
+      carsLabel.setText("There are currently " +
+        multiStory.getParkedCars() + " Cars in the Carpark");
+      spacesLabel.setText("There are currently " +
+        multiStory.getSpaces() + " Spaces in the Carpark");
+      parkedLabel.setText("There are currently " +
+        multiStory.getParkedCars() + " Cars parked");
+      queueLabel.setText("There are currently " +
+        multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
     }
   });
 
