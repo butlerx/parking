@@ -1,24 +1,102 @@
 import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 public class Parking {
 
+  private JFrame mainFrame;
+  private JLabel headerLabel;
+  private JLabel spacesLabel;
+  private JLabel carsLabel;
+  private JPanel controlPanel;
+  private CarPark multiStory = new CarPark(1000);
+
+  public Parking () {
+    prepareGUI();
+  }
+
   public static void main (String [] args) {
-    CarPark multiStory = new CarPark(1000);
-    Clock clock = new Clock(multiStory);
-    clock.start();
-    Entrance in1 = new Entrance(multiStory, 1);
-    Entrance in2 = new Entrance(multiStory, 2);
-    Entrance in3 = new Entrance(multiStory, 3);
-    in1.start();
-    in2.start();
-    in3.start();
-    Exit out1 = new Exit(multiStory, 1);
-    Exit out2 = new Exit(multiStory, 2);
-    Exit out3 = new Exit(multiStory, 3);
-    out1.start();
-    out2.start();
-    out3.start();
-    (new Thread(new Dashboard(multiStory))).start();
+    Parking swingControlDemo = new Parking();
+    swingControlDemo.showDashboard();
+  }
+
+  private void prepareGUI () {
+    mainFrame = new JFrame("Carpark");
+    mainFrame.setSize(400,400);
+    mainFrame.setLayout(new GridLayout(4, 1));
+
+    headerLabel = new JLabel("CarPark",JLabel.CENTER );
+    carsLabel = new JLabel("",JLabel.CENTER);
+    spacesLabel = new JLabel("",JLabel.CENTER);
+    spacesLabel.setSize(350,100);
+    carsLabel.setSize(350,100);
+
+    mainFrame.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent windowEvent){
+        System.exit(0);
+      }
+    });
+    controlPanel = new JPanel();
+    controlPanel.setLayout(new FlowLayout());
+
+    mainFrame.add(headerLabel);
+    mainFrame.add(controlPanel);
+    mainFrame.add(spacesLabel);
+    mainFrame.add(carsLabel);
+    mainFrame.setVisible(true);
+  }
+
+  private void showDashboard () {
+    JButton runButton = new JButton("Run");
+    JButton stopButton = new JButton("Stop");
+    runButton.setActionCommand("Run");
+    stopButton.setActionCommand("Stop");
+    runButton.addActionListener(new ButtonClickListener());
+    stopButton.addActionListener(new ButtonClickListener());
+    controlPanel.add(runButton);
+    controlPanel.add(stopButton);
+    mainFrame.setVisible(true);
+    stats();
+  }
+
+  private void stats () {
+    while(true) {
+      //System.out.printf("The time is %02d:%02d%n", multiStory.getHour(), multiStory.getTime() * 10);
+      carsLabel.setText("There are currently " + multiStory.getNumCars() + " Cars in the Carpark");
+      spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
+    }
+  }
+
+  private class ButtonClickListener implements ActionListener {
+    public void actionPerformed (ActionEvent e) {
+      Clock clock = new Clock(multiStory);
+      Entrance in1 = new Entrance(multiStory, 1);
+      Entrance in2 = new Entrance(multiStory, 2);
+      Entrance in3 = new Entrance(multiStory, 3);
+      Exit out1 = new Exit(multiStory, 1);
+      Exit out2 = new Exit(multiStory, 2);
+      Exit out3 = new Exit(multiStory, 3);
+      String command = e.getActionCommand();
+      if( command.equals( "Run" ))  {
+        clock.start();
+        in1.start();
+        in2.start();
+        in3.start();
+        out1.start();
+        out2.start();
+        out3.start();
+      } else {
+        System.out.print("i tried to stop");
+        clock.kill();
+        in1.kill();
+        in2.kill();
+        in3.kill();
+        out1.kill();
+        out2.kill();
+        out3.kill();
+      }
+    }
   }
 }
 
@@ -181,14 +259,20 @@ class CarPark {
 class Entrance extends Thread {
   private CarPark carPark;
   private int number;
+  private boolean start = true;
 
   public Entrance (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  public void kill () {
+    this.start = false;
+  }
+
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       carPark.lookForSpace();
       carPark.park();
       Random rand = new Random();
@@ -200,13 +284,18 @@ class Entrance extends Thread {
 }
 class Clock extends Thread {
   private CarPark carPark;
+  private boolean start;
 
   public Clock (CarPark c) {
     carPark = c;
   }
+  public void kill () {
+    this.start = false;
+  }
 
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       carPark.passTime();
       try {
         // 1000 is 1 second real time
@@ -220,14 +309,20 @@ class Clock extends Thread {
 class Exit extends Thread {
   private CarPark carPark;
   private int number;
+  private boolean start;
 
   public Exit (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  public void kill () {
+    this.start = false;
+  }
+
   public void run () {
-    while (true) {
+    this.start = true;
+    while (this.start) {
       carPark.leave();
       Random delay = new Random();
       int check = delay.nextInt(50);
