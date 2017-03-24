@@ -34,8 +34,8 @@ public class Parking {
   }
 
   public static void main (String [] args) {
-    Parking swingControlDemo = new Parking();
-    swingControlDemo.showDashboard();
+    Parking carParkOverView = new Parking();
+    carParkOverView.showDashboard();
   }
 
   private void prepareGUI () {

@@ -1,10 +1,5 @@
 version: "3"
 services:
-  parking:
-    build: .
-    volumes:
-      - ./logs:/usr/src/app/logs
-
   javac:
     image: openjdk:8
     container_name: parking-javac
