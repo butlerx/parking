@@ -81,7 +81,9 @@ class CarPark {
   private WaitManager queue;
   private int occupied;
   private int parkSize;
+  // Time is 10 minute
   private int time = 1;
+  private int hour = 0;
 
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
@@ -91,7 +93,11 @@ class CarPark {
   }
 
   public int getTime () {
-    return this.time % 24;
+    return this.time % 6;
+  }
+
+  public int getHour () {
+    return this.hour % 24;
   }
 
   public WaitManager getQueue() {
@@ -100,10 +106,14 @@ class CarPark {
 
   public void passTime () {
     this.time++;
+    if (this.time % 6 == 0) {
+      this.hour++;
+    }
   }
 
   private void removeCar () {
-    int index = (int) Math.random() * occupied;
+    Random rand = new Random();
+    int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
     if (leaver.getConsiderate()) {
       spaces.remove(index);
@@ -207,8 +217,9 @@ class Entrance extends Thread {
     while (true) {
       carPark.lookForSpace();
       //carPark.park();
+      Random rand = new Random();
       try {
-        sleep((int)(Math.random() * 100 * carPark.getTime()));
+        sleep((100 * (rand.nextInt(carPark.getHour() + 1) + 1)));
       } catch (InterruptedException e) { }
     }
   }
@@ -224,7 +235,9 @@ class Clock extends Thread {
     while (true) {
       carPark.passTime();
       try {
-        sleep((int)(Math.random() * 1000));
+        // 1000 is 1 second real time
+        // 1 second real time is 10 min in simulation
+        sleep((1000));
       } catch (InterruptedException e) { }
     }
   }
@@ -252,7 +265,7 @@ class Exit extends Thread {
         } catch (InterruptedException e) { }
       }
       try {
-        sleep((int)(Math.random() * 100 * (24 - carPark.getTime())));
+        sleep((100 * (delay.nextInt(24 - carPark.getHour()) + 1)));
       } catch (InterruptedException e) { }
     }
   }
@@ -269,7 +282,7 @@ class Dashboard extends Thread {
     while (true) {
       System.out.print("\033[H\033[2J");
       System.out.flush();
-      System.out.println("The time is " + carPark.getTime());
+      System.out.printf("The time is %02d:%02d%n", carPark.getHour(), carPark.getTime() * 10);
       System.out.println("There are currently " + carPark.getNumCars() + " Cars in the Carpark");
       System.out.println("There are currently " + carPark.getSpaces() + " Spaces in the Carpark");
       try {
