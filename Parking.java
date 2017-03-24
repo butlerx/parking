@@ -74,7 +74,7 @@ public class Parking {
 
   Timer stats = new Timer(1000, new ActionListener () {
     public void actionPerformed(ActionEvent e) {
-      headerLabel.setText("The time in the CarPark is " + df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime() * 10));
+      headerLabel.setText("The time in the CarPark is " + df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime()));
       carsLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
       parkedLabel.setText("There are currently " + multiStory.getParkedCars() + " Cars parked");
@@ -107,7 +107,6 @@ public class Parking {
         out2.start();
         out3.start();
       } else {
-        System.out.print("i tried to stop");
         clock.kill();
         in1.kill();
         in2.kill();
@@ -138,13 +137,13 @@ class WaitManager {
   public WaitManager() {
     this.waiting = new ArrayList<Car>();
   }
-  public synchronized void addCar(Car visitor) {
+  public synchronized void addCar (Car visitor) {
     waiting.add(visitor);
   }
-  public synchronized Car removeCar() {
+  public synchronized Car removeCar () {
     return waiting.remove(0);
   }
-  public synchronized int getNumWaiting() {
+  public synchronized int getNumWaiting () {
     return waiting.size();
   }
 }
@@ -184,7 +183,7 @@ class CarPark {
   }
 
   public int getTime () {
-    return this.time % 6;
+    return (this.time % 6) * 10;
   }
 
   public int getHour () {
@@ -197,7 +196,7 @@ class CarPark {
 
   public void passTime () {
     this.time++;
-    if (this.time % 6 == 0) {
+    if (this.time % 60 == 0) {
       this.hour++;
     }
   }
@@ -322,12 +321,12 @@ class Entrance extends Thread {
     this.start = true;
     while (this.start) {
       if (carPark.getTotalCars() > carPark.getSize()) {
-        //more cars than spaces
+        // More cars than spaces
         int overflow = carPark.getTotalCars() - carPark.getSize();
-        float entryChance = 1/overflow;
+        float entryChance = 1 / overflow;
         Random gate = new Random();
         if(entryChance > gate.nextFloat()) {
-          //chance of entry decreases the more overflow there is
+          // Chance of entry decreases the more overflow there is
           carPark.lookForSpace();
         }
       } else {
@@ -340,6 +339,7 @@ class Entrance extends Thread {
     }
   }
 }
+
 class Clock extends Thread {
   private CarPark carPark;
   private boolean start;
