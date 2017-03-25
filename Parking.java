@@ -207,7 +207,7 @@ class Parker extends Thread {
   private boolean start;
   private CarPark park;
 
-  public Parker(WaitManager queue, CarPark park) {
+  public Parker (WaitManager queue, CarPark park) {
     this.queue = queue;
     this.park = park;
   }
@@ -220,9 +220,10 @@ class Parker extends Thread {
     this.start = false;
   }
 
-  public void run() {
+  public void run () {
     this.start = true;
     while (true) {
+      System.out.println("Cars are Parking " + this.start);
       if (this.start) {
         park.park();
       }
@@ -402,6 +403,7 @@ class Entrance extends Thread {
   public void run () {
     this.start = true;
     while (true) {
+      System.out.println("Cars are entering " + this.start);
       if (this.start) {
         if (carPark.getTotalCars() > carPark.getSize()) {
           // More cars than spaces
@@ -451,6 +453,7 @@ class Clock extends Thread {
   public void run () {
     this.start = true;
     while (true) {
+      System.out.println("Is time passing " + this.start);
       if (this.start) {
         carPark.passTime();
         try {
@@ -484,6 +487,7 @@ class Exit extends Thread {
   public void run () {
     this.start = true;
     while (true) {
+      System.out.println("Cars are leaving " + this.start);
       if (this.start) {
         carPark.leave();
         Random delay = new Random();
