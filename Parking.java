@@ -390,19 +390,38 @@ class Entrance extends Thread {
   private int number;
   private boolean start;
 
+  /**
+   * Constructor
+   *
+   * @param c (required) The car park to put cars in
+   * @param i (required) The entrance number should be unique
+   */
   public Entrance (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  /**
+   * Restart the process in thread
+   */
   public void restart () {
     this.start = true;
   }
 
+  /**
+   * stop the process in the thread
+   */
   public void kill () {
     this.start = false;
   }
 
+  /**
+   * Override the threads run method
+   * Lets cars in to carpark if its not full
+   * Tracks overflow decreasing chance of entry the larger the overflow
+   * Increases Number of cars entering during Morning rush
+   * Decreases Number of cars entering during evening rush
+   */
   @Override
   public void run () {
     this.start = true;
@@ -451,19 +470,38 @@ class Exit extends Thread {
   private int number;
   private boolean start;
 
+  /**
+   * Constructor
+   *
+   * @param c (required) The car park to remove cars from
+   * @param i (required) The exit number should be unique
+   */
   public Exit (CarPark c, int i) {
     carPark = c;
     this.number = i;
   }
 
+  /**
+   * Restart the process in thread
+   */
   public void restart () {
     this.start = true;
   }
 
+  /**
+   * stop the process in the thread
+   */
   public void kill () {
     this.start = false;
   }
 
+  /**
+   * Override the threads run method
+   * Lets cars leave the carpark
+   * randomly delays car leaving carpark
+   * Increases Number of cars leaving during evening rush
+   * Decreases Number of cars leaving during Morning rush
+   */
   @Override
   public void run () {
     this.start = true;
