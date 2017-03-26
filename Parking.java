@@ -200,13 +200,29 @@ public class Parking {
   }
 }
 
+/**
+ * Car class
+ *
+ * @version     1.0
+ * @since       1.0
+ */
 class Car {
   private boolean considerate;
 
+  /**
+   * Contructor
+   *
+   * @param isConsiderate (required) if the driver will double park
+   */
   public Car (boolean isConsiderate) {
     this.considerate = isConsiderate;
   }
 
+  /**
+   * Check if the Car is double parked
+   *
+   *  @return <tt>false</tt> only if the car is double parked
+   */
   public boolean getConsiderate () {
     return this.considerate;
   }
