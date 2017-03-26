@@ -90,7 +90,7 @@ public class Parking {
         df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime())
       );
       carsLabel.setText("There are currently " +
-        multiStory.getParkedCars() + " Cars in the Carpark");
+        multiStory.getTotalCars() + " Cars in the Carpark");
       spacesLabel.setText("There are currently " +
         multiStory.getSpaces() + " Spaces in the Carpark");
       parkedLabel.setText("There are currently " +
@@ -420,8 +420,10 @@ class Entrance extends Thread {
         Random rand = new Random();
         int sleep;
         if (carPark.isMorningRush()) {
+          // Increase number of cars trying to leave during the morning rush
           sleep = (rand.nextInt(150) + 1);
         } else if (carPark.isEveningRush()) {
+          // Less cars will try to enter during evening rush
           sleep = 1000 * (rand.nextInt(carPark.getHour() + 1) + 1);
         } else {
           sleep = 100 * (rand.nextInt(carPark.getHour() + 1) + 1);
@@ -501,8 +503,10 @@ class Exit extends Thread {
         }
         int sleep;
         if (carPark.isEveningRush()) {
+          // Increase number of cars trying to leave during the Evening rush
           sleep = (delay.nextInt(150) + 1);
-        } else if (carPark.isEveningRush()) {
+        } else if (carPark.isMorningRush()) {
+          // Less Cars will be trying to leave during the morning rush
           sleep = 1000 * (delay.nextInt(24 - carPark.getHour()) + 1);
         } else {
           sleep = 100 * (delay.nextInt(24 - carPark.getHour()) + 1);
