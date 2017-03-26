@@ -379,6 +379,12 @@ class Clock extends Thread {
   }
 }
 
+/**
+ * Entrance class for letting cars in to the carpark
+ *
+ * @version   1.0
+ * @since     1.0
+ */
 class Entrance extends Thread {
   private CarPark carPark;
   private int number;
@@ -434,6 +440,12 @@ class Entrance extends Thread {
   }
 }
 
+/**
+ * Exit class for letting cars leave the carpark
+ *
+ * @version   1.0
+ * @since     1.0
+ */
 class Exit extends Thread {
   private CarPark carPark;
   private int number;
@@ -486,6 +498,12 @@ class Exit extends Thread {
   }
 }
 
+/**
+ * CarPark class for storing cars
+ *
+ * @version   1.0
+ * @since     1.0
+ */
 class CarPark {
   private ArrayList<Car> spaces;
   private WaitManager queue;
