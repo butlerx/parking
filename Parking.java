@@ -23,6 +23,7 @@ public class Parking {
   private JLabel carsLabel;
   private JLabel parkedLabel;
   private JLabel queueLabel;
+  private JLabel delayLabel;
   private JPanel controlPanel;
   private CarPark multiStory = new CarPark(1000);
 
@@ -69,10 +70,12 @@ public class Parking {
     spacesLabel = new JLabel("",JLabel.CENTER);
     queueLabel = new JLabel("",JLabel.CENTER);
     parkedLabel = new JLabel("",JLabel.CENTER);
+    delayLabel = new JLabel("No obstructions at the gates",JLabel.CENTER);
     spacesLabel.setSize(350,100);
     carsLabel.setSize(350,100);
     queueLabel.setSize(350,100);
     parkedLabel.setSize(350,100);
+    delayLabel.setSize(350,100);
 
     mainFrame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent windowEvent){
@@ -87,6 +90,7 @@ public class Parking {
     mainFrame.add(carsLabel);
     mainFrame.add(queueLabel);
     mainFrame.add(parkedLabel);
+    mainFrame.add(delayLabel);
     mainFrame.add(controlPanel);
     mainFrame.setVisible(true);
   }
@@ -112,6 +116,37 @@ public class Parking {
   }
 
   /**
+   * Display status of exits
+   *
+   * @return String of the current status of the exits
+   */
+  private String checkExits () {
+    if (!out1.checkObstruction() && !out2.checkObstruction() && !out3.checkObstruction()) {
+    return "No obstructions at the gates";
+    } else {
+      String status = "There is a car currently stuck at a exit: ";
+      if (out1.checkObstruction()) {
+        status = status + "#1";
+      }
+      if (out2.checkObstruction()) {
+        if (status.contains("#")) {
+          status = status + ", #2";
+        } else {
+          status = status + "#2";
+        }
+      }
+      if (out3.checkObstruction()) {
+        if (status.contains("#")) {
+          status = status + ", #3";
+        } else {
+          status = status + "#3";
+        }
+      }
+      return status;
+    }
+  }
+
+  /**
    * Timer to refresh Dashboard every second with current information from
    * the carpark
    */
@@ -128,6 +163,7 @@ public class Parking {
         multiStory.getParkedCars() + " Cars parked");
       queueLabel.setText("There are currently " +
         multiStory.getQueue().getNumWaiting() + " Cars searching for a space");
+      delayLabel.setText(checkExits());
     }
   });
 
@@ -412,6 +448,7 @@ class Entrance extends Thread {
 class Exit extends Thread {
   private CarPark carPark;
   private int number;
+  private boolean obstruction;
   private boolean start;
 
   /**
@@ -423,6 +460,15 @@ class Exit extends Thread {
   public Exit (CarPark c, int i) {
     carPark = c;
     this.number = i;
+  }
+
+  /**
+   * Check if there is a delay at the exit
+   *
+   * @return true if there is a delay at the exit
+   */
+  public boolean checkObstruction () {
+    return this.obstruction;
   }
 
   /**
@@ -443,16 +489,17 @@ class Exit extends Thread {
   public void run () {
     this.start = true;
     while (this.start) {
-      carPark.leave();
       Random delay = new Random();
       int check = delay.nextInt(50);
       if (check == 25) {
         // Car is delayed, check for how long
         int delayTime = delay.nextInt(5000);
         try {
+          this.obstruction = true;
           sleep(delayTime);
         } catch (InterruptedException e) { }
       }
+      this.obstruction = false;
       int sleep;
       if (carPark.isEveningRush()) {
         // Increase number of cars trying to leave during the Evening rush
