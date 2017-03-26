@@ -210,7 +210,7 @@ class Car {
   private boolean considerate;
 
   /**
-   * Contructor
+   * Constructor
    *
    * @param isConsiderate (required) if the driver will double park
    */
@@ -231,18 +231,36 @@ class Car {
 class WaitManager {
   private ArrayList<Car> waiting;
 
+  /**
+   * Construtor
+   */
   public WaitManager() {
     this.waiting = new ArrayList<Car>();
   }
 
+  /**
+   * Add car to queue
+   *
+   * @param visitor (required) Car to be parked
+   */
   public synchronized void addCar (Car visitor) {
     waiting.add(visitor);
   }
 
+  /**
+   * Remove Car at the front of the queue
+   *
+   * @return Car if there is a car in the queue
+   */
   public synchronized Car removeCar () {
     return waiting.remove(0);
   }
 
+  /**
+   * Check number of cars in the queue
+   *
+   * @return int number of cars currently in queue
+   */
   public synchronized int getNumWaiting () {
     return waiting.size();
   }
