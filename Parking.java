@@ -28,12 +28,12 @@ public class Parking {
   private CarPark multiStory = new CarPark(1000);
 
   private Clock clock = new Clock(multiStory);
-  private Entrance in1 = new Entrance(multiStory, 1);
-  private Entrance in2 = new Entrance(multiStory, 2);
-  private Entrance in3 = new Entrance(multiStory, 3);
-  private Exit out1 = new Exit(multiStory, 1);
-  private Exit out2 = new Exit(multiStory, 2);
-  private Exit out3 = new Exit(multiStory, 3);
+  private Entrance in1 = new Entrance(multiStory, 1, clock);
+  private Entrance in2 = new Entrance(multiStory, 2, clock);
+  private Entrance in3 = new Entrance(multiStory, 3, clock);
+  private Exit out1 = new Exit(multiStory, 1, clock);
+  private Exit out2 = new Exit(multiStory, 2, clock);
+  private Exit out3 = new Exit(multiStory, 3, clock);
   private Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
   private Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
   private Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
@@ -153,7 +153,7 @@ public class Parking {
   Timer stats = new Timer(1000, new ActionListener () {
     public void actionPerformed(ActionEvent e) {
       headerLabel.setText("The time in the CarPark is " +
-        df.format(multiStory.getHour()) + ":" + df.format(multiStory.getTime())
+        df.format(clock.getHour()) + ":" + df.format(clock.getTime())
       );
       carsLabel.setText("There are currently " +
         multiStory.getTotalCars() + " Cars in the Carpark");
@@ -331,6 +331,11 @@ class Parker extends Thread {
 class Clock extends Thread {
   private CarPark carPark;
   private boolean start;
+  // Time is 10 minute
+  private int time = 0;
+  private int hour = 0;
+  private int[] morningRush = {7, 8, 9};
+  private int[] eveningRush = {17, 18, 19};
 
   /**
    * Constructor
@@ -339,6 +344,52 @@ class Clock extends Thread {
    */
   public Clock (CarPark c) {
     carPark = c;
+  }
+
+  /**
+   * Checks the minutes passed
+   *
+   * @return int of minutes passed
+   */
+  public int getTime () {
+    return (this.time % 6) * 10;
+  }
+
+  /**
+   * Checks the hours passed
+   *
+   * @return int of hours passed
+   */
+  public int getHour () {
+    return this.hour % 24;
+  }
+
+  /**
+   * increment the time by 10 minutes
+   */
+  public void passTime () {
+    this.time++;
+    if (this.time % 6 == 0) {
+      this.hour++;
+    }
+  }
+
+  /**
+   * Check if it is the morning Rush
+   *
+   * @return true if it is the morning rush
+   */
+  public boolean isMorningRush () {
+    return IntStream.of(this.morningRush).anyMatch(x -> x == this.hour);
+  }
+
+  /**
+   * Check if it is the evening Rush
+   *
+   * @return true if it is the evening rush
+   */
+  public boolean isEveningRush () {
+    return IntStream.of(this.eveningRush).anyMatch(x -> x == this.hour);
   }
 
   /**
@@ -357,7 +408,7 @@ class Clock extends Thread {
   public void run () {
     this.start = true;
     while (this.start) {
-      carPark.passTime();
+      passTime();
       try {
         // 1000 is 1 second real time
         // 1 second real time is 10 min in simulation
@@ -376,6 +427,7 @@ class Clock extends Thread {
  */
 class Entrance extends Thread {
   private CarPark carPark;
+  private Clock clock;
   private int number;
   private boolean start;
 
@@ -384,9 +436,11 @@ class Entrance extends Thread {
    *
    * @param c (required) The car park to put cars in
    * @param i (required) The entrance number should be unique
+   * @param cl (required) The shared clock between all the threads
    */
-  public Entrance (CarPark c, int i) {
+  public Entrance (CarPark c, int i, Clock cl) {
     carPark = c;
+    clock = cl;
     this.number = i;
   }
 
@@ -422,14 +476,14 @@ class Entrance extends Thread {
       }
       Random rand = new Random();
       int sleep;
-      if (carPark.isMorningRush()) {
+      if (clock.isMorningRush()) {
         // Increase number of cars trying to leave during the morning rush
         sleep = (rand.nextInt(150) + 1);
-      } else if (carPark.isEveningRush()) {
+      } else if (clock.isEveningRush()) {
         // Less cars will try to enter during evening rush
-        sleep = 1000 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        sleep = 1000 * (rand.nextInt(clock.getHour() + 1) + 1);
       } else {
-        sleep = 100 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        sleep = 100 * (rand.nextInt(clock.getHour() + 1) + 1);
       }
       try {
         sleep(Math.abs(sleep));
@@ -447,6 +501,7 @@ class Entrance extends Thread {
  */
 class Exit extends Thread {
   private CarPark carPark;
+  private Clock clock;
   private int number;
   private boolean obstruction;
   private boolean start;
@@ -456,10 +511,12 @@ class Exit extends Thread {
    *
    * @param c (required) The car park to remove cars from
    * @param i (required) The exit number should be unique
+   * @param cl (required) The shared clock between all the threads
    */
-  public Exit (CarPark c, int i) {
+  public Exit (CarPark c, int i, Clock cl) {
     carPark = c;
     this.number = i;
+    clock = cl;
   }
 
   /**
@@ -501,14 +558,14 @@ class Exit extends Thread {
       }
       this.obstruction = false;
       int sleep;
-      if (carPark.isEveningRush()) {
+      if (clock.isEveningRush()) {
         // Increase number of cars trying to leave during the Evening rush
         sleep = (delay.nextInt(150) + 1);
-      } else if (carPark.isMorningRush()) {
+      } else if (clock.isMorningRush()) {
         // Less Cars will be trying to leave during the morning rush
-        sleep = 1000 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        sleep = 1000 * (delay.nextInt(24 - clock.getHour()) + 1);
       } else {
-        sleep = 100 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        sleep = 100 * (delay.nextInt(24 - clock.getHour()) + 1);
       }
       try {
         sleep(sleep);
@@ -529,11 +586,6 @@ class CarPark {
   private WaitManager queue;
   private int occupied;
   private int parkSize;
-  // Time is 10 minute
-  private int time = 0;
-  private int hour = 0;
-  private int[] morningRush = {7, 8, 9};
-  private int[] eveningRush = {17, 18, 19};
 
   /**
    * Constructor
@@ -557,58 +609,12 @@ class CarPark {
   }
 
   /**
-   * Checks the minutes passed
-   *
-   * @return int of minutes passed
-   */
-  public int getTime () {
-    return (this.time % 6) * 10;
-  }
-
-  /**
-   * Checks the hours passed
-   *
-   * @return int of hours passed
-   */
-  public int getHour () {
-    return this.hour % 24;
-  }
-
-  /**
    * Gets the queue for the carpark
    *
    * @return WaitManger of the carpark
    */
   public WaitManager getQueue() {
     return this.queue;
-  }
-
-  /**
-   * increment the time by 10 minutes
-   */
-  public void passTime () {
-    this.time++;
-    if (this.time % 6 == 0) {
-      this.hour++;
-    }
-  }
-
-  /**
-   * Check if it is the morning Rush
-   *
-   * @return true if it is the morning rush
-   */
-  public boolean isMorningRush () {
-    return IntStream.of(this.morningRush).anyMatch(x -> x == this.hour);
-  }
-
-  /**
-   * Check if it is the evening Rush
-   *
-   * @return true if it is the evening rush
-   */
-  public boolean isEveningRush () {
-    return IntStream.of(this.eveningRush).anyMatch(x -> x == this.hour);
   }
 
   /**
