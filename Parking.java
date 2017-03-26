@@ -546,6 +546,7 @@ class Exit extends Thread {
   public void run () {
     this.start = true;
     while (this.start) {
+      carPark.leave();
       Random delay = new Random();
       int check = delay.nextInt(50);
       if (check == 25) {
