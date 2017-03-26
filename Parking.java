@@ -284,12 +284,167 @@ class Parker extends Thread {
     this.start = false;
   }
 
+  @Override
   public void run () {
     this.start = true;
     while (true) {
       System.out.println("Cars are Parking " + this.start);
       if (this.start) {
         park.park();
+      }
+    }
+  }
+}
+
+class Clock extends Thread {
+  private CarPark carPark;
+  private boolean start;
+
+  /**
+   * Constructor
+   */
+  public Clock (CarPark c) {
+    carPark = c;
+  }
+
+  /**
+   * Restart the process in thread
+   */
+  public void restart () {
+    this.start = true;
+  }
+
+  /**
+   * stop the process in the thread
+   */
+  public void kill () {
+    this.start = false;
+  }
+
+  /**
+   * Override the threads run method
+   * Clock to keep track of time in car park
+   * Simulating 10 minutes every 1 second
+   */
+  @Override
+  public void run () {
+    this.start = true;
+    while (true) {
+      System.out.println("Is time passing " + this.start);
+      if (this.start) {
+        carPark.passTime();
+        try {
+          // 1000 is 1 second real time
+          // 1 second real time is 10 min in simulation
+          sleep((1000));
+        } catch (InterruptedException e) { }
+      }
+    }
+  }
+}
+
+class Entrance extends Thread {
+  private CarPark carPark;
+  private int number;
+  private boolean start;
+
+  public Entrance (CarPark c, int i) {
+    carPark = c;
+    this.number = i;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
+  @Override
+  public void run () {
+    this.start = true;
+    while (true) {
+      System.out.println("Cars are entering " + this.start);
+      if (this.start) {
+        if (carPark.getTotalCars() > carPark.getSize()) {
+          // More cars than spaces
+          int overflow = carPark.getTotalCars() - carPark.getSize();
+          float entryChance = 1 / overflow;
+          Random gate = new Random();
+          if(entryChance > gate.nextFloat()) {
+            // Chance of entry decreases the more overflow there is
+            carPark.lookForSpace();
+          }
+        } else {
+          carPark.lookForSpace();
+        }
+        Random rand = new Random();
+        int sleep;
+        if (carPark.isMorningRush()) {
+          // Increase number of cars trying to leave during the morning rush
+          sleep = (rand.nextInt(150) + 1);
+        } else if (carPark.isEveningRush()) {
+          // Less cars will try to enter during evening rush
+          sleep = 1000 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        } else {
+          sleep = 100 * (rand.nextInt(carPark.getHour() + 1) + 1);
+        }
+        try {
+          sleep(Math.abs(sleep));
+        } catch (InterruptedException e) { }
+      }
+    }
+  }
+}
+
+class Exit extends Thread {
+  private CarPark carPark;
+  private int number;
+  private boolean start;
+
+  public Exit (CarPark c, int i) {
+    carPark = c;
+    this.number = i;
+  }
+
+  public void restart () {
+    this.start = true;
+  }
+
+  public void kill () {
+    this.start = false;
+  }
+
+  @Override
+  public void run () {
+    this.start = true;
+    while (true) {
+      System.out.println("Cars are leaving " + this.start);
+      if (this.start) {
+        carPark.leave();
+        Random delay = new Random();
+        int check = delay.nextInt(50);
+        if (check == 25) {
+          // Car is delayed, check for how long
+          int delayTime = delay.nextInt(5000);
+          try {
+            sleep(delayTime);
+          } catch (InterruptedException e) { }
+        }
+        int sleep;
+        if (carPark.isEveningRush()) {
+          // Increase number of cars trying to leave during the Evening rush
+          sleep = (delay.nextInt(150) + 1);
+        } else if (carPark.isMorningRush()) {
+          // Less Cars will be trying to leave during the morning rush
+          sleep = 1000 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        } else {
+          sleep = 100 * (delay.nextInt(24 - carPark.getHour()) + 1);
+        }
+        try {
+          sleep(sleep);
+        } catch (InterruptedException e) { }
       }
     }
   }
@@ -443,142 +598,5 @@ class CarPark {
 
   public synchronized int getTotalCars () {
     return getParkedCars() + queue.getNumWaiting();
-  }
-}
-
-class Entrance extends Thread {
-  private CarPark carPark;
-  private int number;
-  private boolean start;
-
-  public Entrance (CarPark c, int i) {
-    carPark = c;
-    this.number = i;
-  }
-
-  public void restart () {
-    this.start = true;
-  }
-
-  public void kill () {
-    this.start = false;
-  }
-
-  public void run () {
-    this.start = true;
-    while (true) {
-      System.out.println("Cars are entering " + this.start);
-      if (this.start) {
-        if (carPark.getTotalCars() > carPark.getSize()) {
-          // More cars than spaces
-          int overflow = carPark.getTotalCars() - carPark.getSize();
-          float entryChance = 1 / overflow;
-          Random gate = new Random();
-          if(entryChance > gate.nextFloat()) {
-            // Chance of entry decreases the more overflow there is
-            carPark.lookForSpace();
-          }
-        } else {
-          carPark.lookForSpace();
-        }
-        Random rand = new Random();
-        int sleep;
-        if (carPark.isMorningRush()) {
-          // Increase number of cars trying to leave during the morning rush
-          sleep = (rand.nextInt(150) + 1);
-        } else if (carPark.isEveningRush()) {
-          // Less cars will try to enter during evening rush
-          sleep = 1000 * (rand.nextInt(carPark.getHour() + 1) + 1);
-        } else {
-          sleep = 100 * (rand.nextInt(carPark.getHour() + 1) + 1);
-        }
-        try {
-          sleep(Math.abs(sleep));
-        } catch (InterruptedException e) { }
-      }
-    }
-  }
-}
-
-class Clock extends Thread {
-  private CarPark carPark;
-  private boolean start;
-
-  public Clock (CarPark c) {
-    carPark = c;
-  }
-
-  public void restart () {
-    this.start = true;
-  }
-
-  public void kill () {
-    this.start = false;
-  }
-
-  public void run () {
-    this.start = true;
-    while (true) {
-      System.out.println("Is time passing " + this.start);
-      if (this.start) {
-        carPark.passTime();
-        try {
-          // 1000 is 1 second real time
-          // 1 second real time is 10 min in simulation
-          sleep((1000));
-        } catch (InterruptedException e) { }
-      }
-    }
-  }
-}
-
-class Exit extends Thread {
-  private CarPark carPark;
-  private int number;
-  private boolean start;
-
-  public Exit (CarPark c, int i) {
-    carPark = c;
-    this.number = i;
-  }
-
-  public void restart () {
-    this.start = true;
-  }
-
-  public void kill () {
-    this.start = false;
-  }
-
-  public void run () {
-    this.start = true;
-    while (true) {
-      System.out.println("Cars are leaving " + this.start);
-      if (this.start) {
-        carPark.leave();
-        Random delay = new Random();
-        int check = delay.nextInt(50);
-        if (check == 25) {
-          // Car is delayed, check for how long
-          int delayTime = delay.nextInt(5000);
-          try {
-            sleep(delayTime);
-          } catch (InterruptedException e) { }
-        }
-        int sleep;
-        if (carPark.isEveningRush()) {
-          // Increase number of cars trying to leave during the Evening rush
-          sleep = (delay.nextInt(150) + 1);
-        } else if (carPark.isMorningRush()) {
-          // Less Cars will be trying to leave during the morning rush
-          sleep = 1000 * (delay.nextInt(24 - carPark.getHour()) + 1);
-        } else {
-          sleep = 100 * (delay.nextInt(24 - carPark.getHour()) + 1);
-        }
-        try {
-          sleep(sleep);
-        } catch (InterruptedException e) { }
-      }
-    }
   }
 }
