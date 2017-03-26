@@ -553,6 +553,11 @@ class CarPark {
   private int[] morningRush = {7, 8, 9};
   private int[] eveningRush = {17, 18, 19};
 
+  /**
+   * Constructor
+   *
+   * @param size (required) capacity of carpark
+   */
   public CarPark (int size) {
     this.spaces = new ArrayList<Car>();
     this.queue = new WaitManager();
@@ -560,22 +565,45 @@ class CarPark {
     this.parkSize = size;
   }
 
+  /**
+   * Check number of cars the carpark can have
+   *
+   * @return int size of the carpark
+   */
   public int getSize () {
     return this.parkSize;
   }
 
+  /**
+   * Checks the minutes passed
+   *
+   * @return int of minutes passed
+   */
   public int getTime () {
     return (this.time % 6) * 10;
   }
 
+  /**
+   * Checks the hours passed
+   *
+   * @return int of hours passed
+   */
   public int getHour () {
     return this.hour % 24;
   }
 
+  /**
+   * Gets the queue for the carpark
+   *
+   * @return WaitManger of the carpark
+   */
   public WaitManager getQueue() {
     return this.queue;
   }
 
+  /**
+   * increment the time by 10 minutes
+   */
   public void passTime () {
     this.time++;
     if (this.time % 6 == 0) {
@@ -583,14 +611,28 @@ class CarPark {
     }
   }
 
+  /**
+   * Check if it is the morning Rush
+   *
+   * @return true if it is the morning rush
+   */
   public boolean isMorningRush () {
     return IntStream.of(this.morningRush).anyMatch(x -> x == this.hour);
   }
 
+  /**
+   * Check if it is the evening Rush
+   *
+   * @return true if it is the evening rush
+   */
   public boolean isEveningRush () {
     return IntStream.of(this.eveningRush).anyMatch(x -> x == this.hour);
   }
 
+  /**
+   * Remove a random Car from the carpark
+   * Decrease a number of spaces occupied
+   */
   private void removeCar () {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
@@ -608,7 +650,11 @@ class CarPark {
     }
   }
 
-  // Used to find a second space when someone is parked over two spaces
+  /**
+   * Used to find a second space when someone is parked over two spaces
+   *
+   * @return int of postion of a random double parked space
+   */
   private int findAsshole () {
     for (int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
@@ -621,6 +667,9 @@ class CarPark {
     return 0;
   }
 
+  /**
+   * remove a car from the carpark if its not empty
+   */
   public synchronized void leave () {
     while (occupied == 0) {
       try {
@@ -631,6 +680,10 @@ class CarPark {
     notifyAll();
   }
 
+  /**
+   * Look for a free space to put a car
+   * randomly double parks car
+   */
   public synchronized void lookForSpace (){
     Random generator = new Random();
     int check = generator.nextInt(50);
@@ -641,6 +694,9 @@ class CarPark {
     }
   }
 
+  /**
+   * Park a car if the carark isnt full and add to the queue if it is
+   */
   public synchronized void park () {
     while (occupied >= this.parkSize) {
       try {
@@ -653,6 +709,11 @@ class CarPark {
     notifyAll();
   }
 
+  /**
+   * Add car to array of spaces
+   *
+   * @param visitor (required) car to be added to the spaces array
+   */
   private void addCar (Car visitor) {
     if (!visitor.getConsiderate()) {
       // Driver is parked across two spaces
@@ -665,10 +726,20 @@ class CarPark {
     }
   }
 
+  /**
+   * Gets number of occupied spaces in the carpark
+   *
+   * @return int of number occipied spaces
+   */
   public synchronized int getOccupied () {
     return this.occupied;
   }
 
+  /**
+   * Gets number of free spaces in the carpark
+   *
+   * @return int of number free spaces
+   */
   public synchronized int getSpaces () {
     if (this.parkSize - this.occupied < 0) {
       return 0;
@@ -677,6 +748,11 @@ class CarPark {
     }
   }
 
+  /**
+   * Gets number of car in the carpark
+   *
+   * @return int of number of cars in the carpark
+   */
   public synchronized int getParkedCars () {
     int doubleParked = 0;
     for(int i = 0; i < spaces.size(); i++) {
@@ -688,6 +764,11 @@ class CarPark {
     return this.occupied - (doubleParked / 2);
   }
 
+  /**
+   * Gets total number of car in the carpark and queue
+   *
+   * @return int of number of cars in the carpark and queue
+   */
   public synchronized int getTotalCars () {
     return getParkedCars() + queue.getNumWaiting();
   }
