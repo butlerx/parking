@@ -6,6 +6,15 @@ import java.text.DecimalFormat;
 import javax.swing.Timer;
 import java.util.stream.IntStream;
 
+/**
+ * Car park simulator
+ *
+ * <P> Car park simulator with multiple queued entrances and exits
+ *
+ * @author      Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
+ * @version     1.0
+ * @since       1.0
+ */
 public class Parking {
 
   private JFrame mainFrame;
@@ -16,8 +25,6 @@ public class Parking {
   private JLabel queueLabel;
   private JPanel controlPanel;
   private CarPark multiStory = new CarPark(1000);
-
-  static DecimalFormat df = new DecimalFormat("00");
 
   private Clock clock = new Clock(multiStory);
   private Entrance in1 = new Entrance(multiStory, 1);
@@ -30,15 +37,28 @@ public class Parking {
   private Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
   private Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
 
+  private static DecimalFormat df = new DecimalFormat("00");
+
+  /**
+   * Constructor.
+   */
   public Parking () {
     prepareGUI();
   }
 
+  /**
+   * main method
+   */
   public static void main (String [] args) {
     Parking carParkOverView = new Parking();
     carParkOverView.showDashboard();
   }
 
+  /**
+   * Prepare the User dashboard of information and controls
+   *
+   * @see javax.swing
+   **/
   private void prepareGUI () {
     mainFrame = new JFrame("Carpark");
     mainFrame.setSize(400,400);
@@ -71,6 +91,9 @@ public class Parking {
     mainFrame.setVisible(true);
   }
 
+  /**
+   * Show Dashboard to user
+   */
   private void showDashboard () {
     JButton runButton = new JButton("Run");
     JButton stopButton = new JButton("Stop");
@@ -84,6 +107,10 @@ public class Parking {
     stats.start();
   }
 
+  /**
+   * Timer to refresh Dashboard every second with current information from
+   * the carpark
+   */
   Timer stats = new Timer(1000, new ActionListener () {
     public void actionPerformed(ActionEvent e) {
       headerLabel.setText("The time in the CarPark is " +
@@ -100,6 +127,9 @@ public class Parking {
     }
   });
 
+  /**
+   * Listen for button click to start and stop threads
+   */
   private class ButtonClickListener implements ActionListener {
     public void actionPerformed (ActionEvent e) {
       String command = e.getActionCommand();
