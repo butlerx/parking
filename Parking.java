@@ -203,6 +203,9 @@ public class Parking {
 /**
  * Car class
  *
+ * <P> Class to simulate car
+ *
+ * @author      Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version     1.0
  * @since       1.0
  */
@@ -231,6 +234,7 @@ class Car {
 /**
  * Wait Manager class for queueing cars
  *
+ * @author      Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version     1.0
  * @since       1.0
  */
@@ -275,6 +279,7 @@ class WaitManager {
 /**
  * Parker class for removeing cars from queue and parking them int the car Park
  *
+ * @author    Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version   1.0
  * @since     1.0
  */
@@ -327,6 +332,7 @@ class Parker extends Thread {
 /**
  * Clock class for keeping track of time in the carpark
  *
+ * @author      Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version   1.0
  * @since     1.0
  */
@@ -382,6 +388,7 @@ class Clock extends Thread {
 /**
  * Entrance class for letting cars in to the carpark
  *
+ * @author    Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version   1.0
  * @since     1.0
  */
@@ -462,6 +469,7 @@ class Entrance extends Thread {
 /**
  * Exit class for letting cars leave the carpark
  *
+ * @author    Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version   1.0
  * @since     1.0
  */
@@ -539,6 +547,7 @@ class Exit extends Thread {
 /**
  * CarPark class for storing cars
  *
+ * @author    Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version   1.0
  * @since     1.0
  */
