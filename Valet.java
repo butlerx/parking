@@ -5,7 +5,7 @@
  * @version 1.0
  * @since 1.0
  */
-class Parker extends Thread {
+class Valet extends Thread {
   private WaitManager queue;
   private boolean start;
   private CarPark park;
@@ -16,7 +16,7 @@ class Parker extends Thread {
    * @param queue (required) the queue to take cars from
    * @param park (required) the Car park to park in
    */
-  public Parker(WaitManager queue, CarPark park) {
+  public Valet(WaitManager queue, CarPark park) {
     this.queue = queue;
     this.park = park;
   }
