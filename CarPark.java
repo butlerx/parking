@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * CarPark class for storing cars
@@ -9,7 +10,7 @@ import java.util.*;
  */
 class CarPark {
   private ArrayList<Car> spaces;
-  private WaitManager queue;
+  private LinkedBlockingQueue<Car> queue;
   private int occupied;
   private int parkSize;
 
@@ -20,7 +21,7 @@ class CarPark {
    */
   public CarPark(int size) {
     this.spaces = new ArrayList<Car>();
-    this.queue = new WaitManager();
+    this.queue = new LinkedBlockingQueue<Car>();
     this.occupied = 0;
     this.parkSize = size;
   }
@@ -39,7 +40,7 @@ class CarPark {
    *
    * @return WaitManger of the carpark
    */
-  public WaitManager getQueue() {
+  public LinkedBlockingQueue<Car> getQueue() {
     return this.queue;
   }
 
@@ -103,24 +104,14 @@ class CarPark {
     Random generator = new Random();
     int check = generator.nextInt(50);
     if (check == 25) {
-      queue.addCar(new Car(false));
+        try {
+            queue.put(new Car(false));
+        } catch (InterruptedException e) {}
     } else {
-      queue.addCar(new Car(true));
+        try {
+            queue.put(new Car(true));
+        } catch (InterruptedException e) {}
     }
-  }
-
-  /** Park a car if the carark isnt full and add to the queue if it is */
-  public synchronized void park() {
-    while (occupied >= this.parkSize) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-      }
-    }
-    if (queue.getNumWaiting() > 0) {
-      addCar(queue.removeCar());
-    }
-    notifyAll();
   }
 
   /**
@@ -128,7 +119,7 @@ class CarPark {
    *
    * @param visitor (required) car to be added to the spaces array
    */
-  private void addCar(Car visitor) {
+  public void addCar(Car visitor) {
     if (!visitor.getConsiderate()) {
       // Driver is parked across two spaces
       spaces.add(visitor);
@@ -184,6 +175,6 @@ class CarPark {
    * @return int of number of cars in the carpark and queue
    */
   public synchronized int getTotalCars() {
-    return getParkedCars() + queue.getNumWaiting();
+    return getParkedCars() + queue.size();
   }
 }
