@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
@@ -26,7 +25,7 @@ public class Parking {
   private JPanel controlPanel;
   private CarPark multiStory = new CarPark(1000);
 
-  private Clock clock = new Clock(multiStory);
+  private Clock clock = new Clock(headerLabel);
   private Entrance in1 = new Entrance(multiStory, 1, clock);
   private Entrance in2 = new Entrance(multiStory, 2, clock);
   private Entrance in3 = new Entrance(multiStory, 3, clock);
@@ -37,7 +36,6 @@ public class Parking {
   private Valet wait2 = new Valet(multiStory.getQueue(), multiStory);
   private Valet wait3 = new Valet(multiStory.getQueue(), multiStory);
 
-  private static DecimalFormat df = new DecimalFormat("00");
 
   /** Constructor. */
   public Parking() {
@@ -146,11 +144,6 @@ public class Parking {
           1000,
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              headerLabel.setText(
-                  "The time in the CarPark is "
-                      + df.format(clock.getHour())
-                      + ":"
-                      + df.format(clock.getTime()));
               carsLabel.setText(
                   "There are currently " + multiStory.getTotalCars() + " Cars in the Carpark");
               spacesLabel.setText(
@@ -170,7 +163,7 @@ public class Parking {
     public void actionPerformed(ActionEvent e) {
       String command = e.getActionCommand();
       if (command.equals("Run")) {
-        clock.start();
+        clock.execute();
         in1.start();
         in2.start();
         in3.start();
@@ -181,7 +174,7 @@ public class Parking {
         out2.start();
         out3.start();
       } else if (command.equals("Stop")) {
-        clock.kill();
+        clock.cancel(true);
         in1.kill();
         in2.kill();
         in3.kill();
