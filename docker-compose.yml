@@ -1,8 +1,0 @@
-version: "3"
-services:
-  parking:
-    image: openjdk:8
-    command: javac Parking.java
-    working_dir: /usr/src/app
-    volumes:
-      -  $PWD:/usr/src/app

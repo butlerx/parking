@@ -2,10 +2,8 @@
 
 Car park simulator with multiple queued entrances and exits
 
-## Docker
+## Running
 
-Compile in docker
+To Build from source run `make`.
 
-```
-docker-compose run --rm parking
-```
+To Run the programme run `make run`
