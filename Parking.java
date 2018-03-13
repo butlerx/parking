@@ -10,7 +10,7 @@ import javax.swing.Timer;
  *
  * <p>Car park simulator with multiple queued entrances and exits
  *
- * @author Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
+ * @author Cian Butler <cian.butler25@mail.dcu.ie>, Terry Bolt <terrence.bolt2@mail.dcu.ie>
  * @version 1.0
  * @since 1.0
  */
