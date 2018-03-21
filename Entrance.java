@@ -40,8 +40,8 @@ class Entrance extends SwingWorker<Integer, String> {
   @Override
   protected Integer doInBackground() throws Exception {
     Random rand = new Random();
-    while (true) {
-      int overflow = valet.getTotalCars() - valet.carParkSize();
+    while (!this.isCancelled()) {
+      int overflow = valet.totalCars() - valet.carParkSize();
       if (overflow > 0) {
         // More cars than spaces
         float entryChance = 1 / overflow;
@@ -66,5 +66,6 @@ class Entrance extends SwingWorker<Integer, String> {
       } catch (InterruptedException e) {
       }
     }
+    return 0;
   }
 }

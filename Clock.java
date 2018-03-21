@@ -1,6 +1,6 @@
 import java.text.DecimalFormat;
 import java.util.stream.IntStream;
-import javax.swing.*;
+import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
 /**
@@ -10,8 +10,16 @@ import javax.swing.SwingWorker;
  * @version 2.0
  * @since 1.0
  */
-class Clock extends SwingWorker<Integer, String> {
+class Clock extends SwingWorker<Integer, Integer> {
   private JLabel display;
+
+  public static class Seed {
+    public int time = 0;
+
+    public Seed() {}
+  }
+
+  private Seed seed;
   private static DecimalFormat df = new DecimalFormat("00");
   // Time is 10 minute
   private int time = 0;
@@ -20,7 +28,10 @@ class Clock extends SwingWorker<Integer, String> {
   private int[] eveningRush = {17, 18, 19};
 
   /** Constructor */
-  public Clock(JLabel label) {
+  public Clock(JLabel label, Seed seed) {
+    this.time = seed.time % 60;
+    this.hour = (seed.time - this.time) / 60;
+    this.seed = seed;
     this.display = label;
   }
 
@@ -67,13 +78,14 @@ class Clock extends SwingWorker<Integer, String> {
    */
   @Override
   protected Integer doInBackground() throws Exception {
-    while (true) {
+    while (!this.isCancelled()) {
       this.time += 1;
       if (this.time % 60 == 0) {
         this.hour++;
       }
+      this.seed.time = (this.hour * 60) + this.time;
       try {
-        display.setText(
+        this.display.setText(
             "The time in the CarPark is "
                 + df.format(this.hour % 24)
                 + ":"
@@ -84,5 +96,6 @@ class Clock extends SwingWorker<Integer, String> {
       } catch (InterruptedException e) {
       }
     }
+    return (this.hour * 60) + this.time;
   }
 }

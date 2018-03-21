@@ -1,4 +1,5 @@
 import java.util.*;
+import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
 /**
@@ -8,7 +9,8 @@ import javax.swing.SwingWorker;
  * @version 2.0
  * @since 1.0
  */
-class Exit extends SwingWorker<Integer, String> {
+class ParkExit extends SwingWorker<Integer, String> {
+  private JLabel display;
   private Valet valet;
   private Clock clock;
   private int number;
@@ -20,7 +22,8 @@ class Exit extends SwingWorker<Integer, String> {
    * @param i (required) The exit number should be unique
    * @param cl (required) The shared clock between all the threads
    */
-  public Exit(Valet v, int i, Clock cl) {
+  public ParkExit(Valet v, int i, Clock cl, JLabel label) {
+    this.display = label;
     this.valet = v;
     this.clock = cl;
     this.number = i;
@@ -40,13 +43,13 @@ class Exit extends SwingWorker<Integer, String> {
   @Override
   protected Integer doInBackground() throws Exception {
     Random delay = new Random();
-    while (true) {
+    while (!this.isCancelled()) {
       // Signal valet to remove a car
       this.valet.leave();
       try {
         if (delay.nextInt(50) == 21) {
           // Car is delayed, check for how long
-          publish("exit " + this.number + "obstructed");
+          this.display.setText("exit " + this.number + "obstructed");
           Thread.sleep(delay.nextInt(5000));
         }
         Thread.sleep(
@@ -62,5 +65,6 @@ class Exit extends SwingWorker<Integer, String> {
       } catch (InterruptedException e) {
       }
     }
+    return 0;
   }
 }

@@ -10,20 +10,19 @@ import java.util.concurrent.*;
  */
 class CarPark {
   private ArrayList<Car> spaces;
-  private LinkedBlockingQueue<Car> queue;
+  public LinkedBlockingQueue<Car> queue;
   private int occupied;
-  private int parkSize;
+  public final int parkSize = 1000;
 
   /**
    * Constructor
    *
    * @param size (required) capacity of carpark
    */
-  public CarPark(int size) {
+  public CarPark() {
     this.spaces = new ArrayList<Car>();
     this.queue = new LinkedBlockingQueue<Car>();
     this.occupied = 0;
-    this.parkSize = size;
   }
 
   /**
@@ -31,17 +30,8 @@ class CarPark {
    *
    * @return int size of the carpark
    */
-  public int getSize() {
+  public int size() {
     return this.parkSize;
-  }
-
-  /**
-   * Gets the queue for the carpark
-   *
-   * @return WaitManger of the carpark
-   */
-  public LinkedBlockingQueue<Car> getQueue() {
-    return this.queue;
   }
 
   /**
@@ -49,7 +39,7 @@ class CarPark {
    *
    * <p>Decrease a number of spaces occupied.
    */
-  private void removeCar() {
+  public void removeCar() {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
@@ -81,16 +71,13 @@ class CarPark {
     return 0;
   }
 
-  /** remove a car from the carpark if its not empty */
-  public synchronized void leave() {
-    while (occupied == 0) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-      }
-    }
-    removeCar();
-    notifyAll();
+  /**
+   * check if carpark is empty
+   *
+   * @return true if car is empty
+   */
+  public boolean empty() {
+    return this.occupied == 0;
   }
 
   /**
@@ -167,14 +154,5 @@ class CarPark {
       }
     }
     return this.occupied - (doubleParked / 2);
-  }
-
-  /**
-   * Gets total number of car in the carpark and queue
-   *
-   * @return int of number of cars in the carpark and queue
-   */
-  public synchronized int getTotalCars() {
-    return getParkedCars() + queue.size();
   }
 }
