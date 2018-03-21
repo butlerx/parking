@@ -53,7 +53,7 @@ class CarPark {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
-    if (leaver.getConsiderate()) {
+    if (!leaver.isDoubleParked()) {
       spaces.remove(index);
       occupied--;
     } else {
@@ -74,9 +74,7 @@ class CarPark {
   private int findAsshole() {
     for (int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
-      if (!check.getConsiderate()) {
-        return i;
-      }
+      if (check.isDoubleParked()) return i;
     }
     // We've somehow managed to get to the end without finding the pair,
     // remove the first car in the car park
@@ -104,13 +102,15 @@ class CarPark {
     Random generator = new Random();
     int check = generator.nextInt(50);
     if (check == 25) {
-        try {
-            queue.put(new Car(false));
-        } catch (InterruptedException e) {}
+      try {
+        queue.put(new Car(false));
+      } catch (InterruptedException e) {
+      }
     } else {
-        try {
-            queue.put(new Car(true));
-        } catch (InterruptedException e) {}
+      try {
+        queue.put(new Car(true));
+      } catch (InterruptedException e) {
+      }
     }
   }
 
@@ -120,7 +120,7 @@ class CarPark {
    * @param visitor (required) car to be added to the spaces array
    */
   public void addCar(Car visitor) {
-    if (!visitor.getConsiderate()) {
+    if (visitor.isDoubleParked()) {
       // Driver is parked across two spaces
       spaces.add(visitor);
       spaces.add(visitor);
@@ -162,7 +162,7 @@ class CarPark {
     int doubleParked = 0;
     for (int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
-      if (!check.getConsiderate()) {
+      if (check.isDoubleParked()) {
         doubleParked++;
       }
     }

@@ -4,7 +4,7 @@
  * <p>Class to simulate car
  *
  * @author Cian Butler <cian.butler25@mail.dcu.ie>, Terry Bolt <terrence.bolt2@mail.dcu.ie>
- * @version 1.0
+ * @version 2.0
  * @since 1.0
  */
 class Car {
@@ -22,9 +22,9 @@ class Car {
   /**
    * Check if the Car is double parked
    *
-   * @return <tt>false</tt> only if the car is double parked
+   * @return <tt>true</tt> only if the car is double parked
    */
-  public boolean getConsiderate() {
-    return this.considerate;
+  public boolean isDoubleParked() {
+    return !this.considerate;
   }
 }
