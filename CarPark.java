@@ -1,4 +1,6 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * CarPark class for storing cars
@@ -8,45 +10,18 @@ import java.util.*;
  * @since 1.0
  */
 class CarPark {
-  private ArrayList<Car> spaces = new ArrayList<Car>();
-  private WaitManager queue = new WaitManager();
+  private ArrayList<Car> spaces = new ArrayList<Car>();;
+  public LinkedBlockingQueue<Car> queue = new LinkedBlockingQueue<Car>();;
   private int occupied = 0;
-  private int parkSize;
-
-  /**
-   * Constructor
-   *
-   * @param size (required) capacity of carpark
-   */
-  public CarPark(int size) {
-    this.parkSize = size;
-  }
+  public final int parkSize = 1000;
 
   /**
    * Check number of cars the carpark can have
    *
    * @return int size of the carpark
    */
-  public int getSize() {
+  public int size() {
     return this.parkSize;
-  }
-
-  /**
-   * Gets the queue for the carpark
-   *
-   * @return WaitManger of the carpark
-   */
-  public WaitManager getQueue() {
-    return this.queue;
-  }
-
-  /**
-   * Check if the CarPark is full
-   *
-   * @return boolean true if carpark is full
-   */
-  public synchronized boolean full() {
-    return this.occupied >= this.parkSize;
   }
 
   /**
@@ -54,7 +29,7 @@ class CarPark {
    *
    * <p>Decrease a number of spaces occupied.
    */
-  private void removeCar() {
+  public synchronized void removeCar() {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
@@ -88,7 +63,7 @@ class CarPark {
    *
    * @return true if car is empty
    */
-  public boolean empty() {
+  public synchronized boolean empty() {
     return this.occupied == 0;
   }
 
@@ -105,42 +80,21 @@ class CarPark {
   }
 
   /**
-   * Look for a free space to put a car
-   *
-   * @param c car to park
-   */
-  public synchronized void lookForSpace(Car c) {
-    queue.addCar(c);
-  }
-
-  /** Park a car if the carark isnt full and add to the queue if it is */
-  public synchronized void park() {
-    while (this.full()) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-      }
-    }
-    if (queue.getNumWaiting() > 0) {
-      addCar(queue.removeCar());
-    }
-    notifyAll();
-  }
-
-  /**
    * Add car to array of spaces
    *
    * @param visitor (required) car to be added to the spaces array
    */
-  private void addCar(Car visitor) {
-    if (visitor.isDoubleParked()) {
-      // Driver is parked across two spaces
-      spaces.add(visitor);
-      spaces.add(visitor);
-      occupied += 2;
-    } else {
-      spaces.add(visitor);
-      occupied++;
+  public synchronized void addCar(Car visitor) {
+    if (visitor != null) {
+      if (visitor.isDoubleParked()) {
+        // Driver is parked across two spaces
+        spaces.add(visitor);
+        spaces.add(visitor);
+        occupied += 2;
+      } else {
+        spaces.add(visitor);
+        occupied++;
+      }
     }
   }
 
@@ -182,11 +136,11 @@ class CarPark {
   }
 
   /**
-   * Gets total number of car in the carpark and queue
+   * Check if the CarPark is full
    *
-   * @return int of number of cars in the carpark and queue
+   * @return boolean true if carpark is full
    */
-  public synchronized int getTotalCars() {
-    return getParkedCars() + queue.getNumWaiting();
+  public synchronized boolean full() {
+    return this.occupied >= this.parkSize;
   }
 }

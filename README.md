@@ -1,12 +1,12 @@
 # Parking
+
 Car park simulator with multiple queued entrances and exits
 
-## Docker
-Compile in docker
-```
-docker-compose up javac
-```
-Running in docker
-```
-docker-compose up run
-```
+* v2.0: Swing workers
+* v1.0: Threaded
+
+## Running
+
+To Build from source run `make`.
+
+To Run the programme run `make run`

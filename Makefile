@@ -17,6 +17,4 @@ clean:
 	$(RM) *.class
 
 run:
-	$(classes)
 	java Parking
-

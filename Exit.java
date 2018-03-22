@@ -1,52 +1,37 @@
-import java.util.*;
+import java.util.Random;
 import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 
 /**
  * Exit class for letting cars leave the carpark
  *
  * @author Cian Butler <cian.butler25@mail.dcu.ie>, Terry Bolt <terrence.bolt2@mail.dcu.ie>
- * @version 1.0
+ * @version 2.0
  * @since 1.0
  */
-class Exit extends Thread {
+class Exit extends SwingWorker<Integer, String> {
   private JLabel display;
-  private CarPark carPark;
+  private Valet valet;
   private Clock clock;
   private int number;
-  private boolean obstruction = false;
-  private boolean start;
 
   /**
    * Constructor
    *
-   * @param c (required) The car park to remove cars from
+   * @param v (required) The Valet to remove the car
    * @param i (required) The exit number should be unique
    * @param cl (required) The shared clock between all the threads
    * @param label (required) label to output too
    */
-  public Exit(CarPark c, int i, Clock cl, JLabel label) {
-    this.carPark = c;
-    this.number = i;
-    this.clock = cl;
+  public Exit(Valet v, int i, Clock cl, JLabel label) {
     this.display = label;
+    this.valet = v;
+    this.clock = cl;
+    this.number = i;
   }
 
   /**
-   * Check if there is a delay at the exit
-   *
-   * @return true if there is a delay at the exit
-   */
-  public boolean checkObstruction() {
-    return this.obstruction;
-  }
-
-  /** stop the process in the thread */
-  public void kill() {
-    this.start = false;
-  }
-
-  /**
-   * Override the threads run method
+   * Override the workers doInBackground method
    *
    * <p>Lets cars leave the carpark
    *
@@ -57,15 +42,15 @@ class Exit extends Thread {
    * <p>Decreases Number of cars leaving during Morning rush
    */
   @Override
-  public void run() {
-    this.start = true;
+  protected Integer doInBackground() throws Exception {
     Random delay = new Random();
-    while (this.start) {
-      this.carPark.leave();
+    while (!this.isCancelled()) {
+      // Signal valet to remove a car
+      this.valet.leave();
       try {
         if (delay.nextInt(50) == 21) {
           // Car is delayed, check for how long
-          this.display.setText("exit " + this.number + "obstructed");
+          this.display.setText("exit " + this.number + " obstructed");
           Thread.sleep(delay.nextInt(5000));
           this.display.setText("No obstructions at Exit " + this.number);
         }
@@ -82,5 +67,6 @@ class Exit extends Thread {
       } catch (InterruptedException e) {
       }
     }
+    return 0;
   }
 }
