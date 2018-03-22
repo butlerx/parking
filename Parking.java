@@ -9,14 +9,13 @@ import javax.swing.*;
  * <p>Car park simulator with multiple queued entrances and exits
  *
  * @author Cian Butler <cian.butler25@mail.dcu.ie>, Terry Bolt <terrence.bolt2@mail.dcu.ie>
- * @version 1.0
+ * @version 2.0
  * @since 1.0
  */
 public class Parking {
-
   private JFrame mainFrame = new JFrame("Carpark");
-  private JPanel controlPanel = new JPanel();
   private JLabel headerLabel = new JLabel("CarPark", JLabel.CENTER);
+  private JPanel controlPanel = new JPanel();
   private JLabel carsLabel = new JLabel("There are currently 0 Cars in the Carpark", JLabel.CENTER);
   private JLabel spacesLabel =
       new JLabel("There are currently 1000 Spaces in the Carpark", JLabel.CENTER);
@@ -46,7 +45,9 @@ public class Parking {
   }
 
   /**
-   * Constructor Prepare the User dashboard of information and controls
+   * Constructor
+   *
+   * <p>Prepare the User dashboard of information and controls
    *
    * @see javax.swing
    */

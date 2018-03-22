@@ -2,14 +2,13 @@ import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
 /**
- * Parker class for removeing cars from queue and parking them int the car Park
+ * Valet class for removing cars from queue and parking them int the car Park
  *
  * @author Cian Butler <cian.butler25@mail.dcu.ie>, Terry Bolt <terrence.bolt2@mail.dcu.ie>
  * @version 2.0
  * @since 1.0
  */
 class Valet extends SwingWorker<Integer, Void> {
-  private boolean start;
   private CarPark park;
   private JLabel carsLabel;
   private JLabel spacesLabel;

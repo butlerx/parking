@@ -21,6 +21,7 @@ class Exit extends SwingWorker<Integer, String> {
    * @param v (required) The Valet to remove the car
    * @param i (required) The exit number should be unique
    * @param cl (required) The shared clock between all the threads
+   * @param label (required) label to output too
    */
   public Exit(Valet v, int i, Clock cl, JLabel label) {
     this.display = label;

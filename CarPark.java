@@ -14,9 +14,6 @@ class CarPark {
   private int occupied = 0;
   public final int parkSize = 1000;
 
-  /** Constructor */
-  public CarPark() {}
-
   /**
    * Check number of cars the carpark can have
    *
@@ -31,7 +28,7 @@ class CarPark {
    *
    * <p>Decrease a number of spaces occupied.
    */
-  public void removeCar() {
+  public synchronized void removeCar() {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
@@ -41,7 +38,6 @@ class CarPark {
     } else {
       // Driver is occupying two spaces
       spaces.remove(index);
-      // We've freed one of the spaces they occupied, we must free a second
       spaces.remove(findAsshole());
       occupied -= 2;
     }
@@ -50,15 +46,14 @@ class CarPark {
   /**
    * Used to find a second space when someone is parked over two spaces
    *
+   * <p>Will return first car if it cant find second car
+   *
    * @return int of postion of a random double parked space
    */
   private int findAsshole() {
     for (int i = 0; i < spaces.size(); i++) {
-      Car check = spaces.get(i);
-      if (check.isDoubleParked()) return i;
+      if (spaces.get(i).isDoubleParked()) return i;
     }
-    // We've somehow managed to get to the end without finding the pair,
-    // remove the first car in the car park
     return 0;
   }
 
@@ -67,8 +62,20 @@ class CarPark {
    *
    * @return true if car is empty
    */
-  public boolean empty() {
+  public synchronized boolean empty() {
     return this.occupied == 0;
+  }
+
+  /** remove a car from the carpark if its not empty */
+  public synchronized void leave() {
+    while (this.empty()) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+      }
+    }
+    removeCar();
+    notifyAll();
   }
 
   /**
@@ -76,7 +83,7 @@ class CarPark {
    *
    * @param visitor (required) car to be added to the spaces array
    */
-  public void addCar(Car visitor) {
+  public synchronized void addCar(Car visitor) {
     if (visitor != null) {
       if (visitor.isDoubleParked()) {
         // Driver is parked across two spaces
@@ -120,8 +127,7 @@ class CarPark {
   public synchronized int getParkedCars() {
     int doubleParked = 0;
     for (int i = 0; i < spaces.size(); i++) {
-      Car check = spaces.get(i);
-      if (check.isDoubleParked()) {
+      if (spaces.get(i).isDoubleParked()) {
         doubleParked++;
       }
     }
