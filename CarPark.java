@@ -9,21 +9,13 @@ import java.util.concurrent.*;
  * @since 1.0
  */
 class CarPark {
-  private ArrayList<Car> spaces;
-  public LinkedBlockingQueue<Car> queue;
-  private int occupied;
+  private ArrayList<Car> spaces = new ArrayList<Car>();;
+  public LinkedBlockingQueue<Car> queue = new LinkedBlockingQueue<Car>();;
+  private int occupied = 0;
   public final int parkSize = 1000;
 
-  /**
-   * Constructor
-   *
-   * @param size (required) capacity of carpark
-   */
-  public CarPark() {
-    this.spaces = new ArrayList<Car>();
-    this.queue = new LinkedBlockingQueue<Car>();
-    this.occupied = 0;
-  }
+  /** Constructor */
+  public CarPark() {}
 
   /**
    * Check number of cars the carpark can have
@@ -50,8 +42,7 @@ class CarPark {
       // Driver is occupying two spaces
       spaces.remove(index);
       // We've freed one of the spaces they occupied, we must free a second
-      index = findAsshole();
-      spaces.remove(index);
+      spaces.remove(findAsshole());
       occupied -= 2;
     }
   }
@@ -81,40 +72,21 @@ class CarPark {
   }
 
   /**
-   * Look for a free space to put a car
-   *
-   * <p>randomly double parks car
-   */
-  public synchronized void lookForSpace() {
-    Random generator = new Random();
-    int check = generator.nextInt(50);
-    if (check == 25) {
-      try {
-        queue.put(new Car(false));
-      } catch (InterruptedException e) {
-      }
-    } else {
-      try {
-        queue.put(new Car(true));
-      } catch (InterruptedException e) {
-      }
-    }
-  }
-
-  /**
    * Add car to array of spaces
    *
    * @param visitor (required) car to be added to the spaces array
    */
   public void addCar(Car visitor) {
-    if (visitor.isDoubleParked()) {
-      // Driver is parked across two spaces
-      spaces.add(visitor);
-      spaces.add(visitor);
-      occupied += 2;
-    } else {
-      spaces.add(visitor);
-      occupied++;
+    if (visitor != null) {
+      if (visitor.isDoubleParked()) {
+        // Driver is parked across two spaces
+        spaces.add(visitor);
+        spaces.add(visitor);
+        occupied += 2;
+      } else {
+        spaces.add(visitor);
+        occupied++;
+      }
     }
   }
 

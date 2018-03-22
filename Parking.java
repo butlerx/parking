@@ -121,8 +121,8 @@ public class Parking {
         out1 = new ParkExit(valet, 1, clock, Exit1Label);
         out2 = new ParkExit(valet, 2, clock, Exit2Label);
         out3 = new ParkExit(valet, 3, clock, Exit3Label);
-        clock.execute();
         valet.execute();
+        clock.execute();
         in1.execute();
         in2.execute();
         in3.execute();
@@ -139,7 +139,7 @@ public class Parking {
       if (state == "running") {
         state = "";
         clock.cancel(false);
-        valet.cancel(true);
+        valet.cancel(false);
         in1.cancel(true);
         in2.cancel(true);
         in3.cancel(true);

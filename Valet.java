@@ -31,25 +31,30 @@ class Valet extends SwingWorker<Integer, Void> {
    * @param visitor (required) car to be added to the spaces array
    */
   public void park(Car c) {
-    this.park.addCar(c);
+    try {
+      this.park.queue.put(c);
+    } catch (InterruptedException e) {
+    }
   }
 
   /** remove a car from the carpark if its not empty */
   public void leave() {
     while (this.park.empty()) {
       try {
-        wait();
+        Thread.sleep(1000);
       } catch (InterruptedException e) {
       }
     }
     this.park.removeCar();
-    notifyAll();
   }
 
   /** update the interface */
   @Override
   protected Integer doInBackground() throws Exception {
+    System.out.println(this.park.queue.size() + " " + this.isCancelled());
     while (!this.isCancelled()) {
+      System.out.println(this.park.queue.size());
+      this.park.addCar(this.park.queue.poll());
       this.carsLabel.setText("There are currently " + this.totalCars() + " Cars in the Carpark");
       this.spacesLabel.setText(
           "There are currently " + this.park.getSpaces() + " Spaces in the Carpark");
@@ -65,7 +70,7 @@ class Valet extends SwingWorker<Integer, Void> {
    *
    * @return int size of the carpark
    */
-  public int carParkSize() {
+  public synchronized int carParkSize() {
     return this.park.size();
   }
 
@@ -74,7 +79,7 @@ class Valet extends SwingWorker<Integer, Void> {
    *
    * @return int of number of cars in the carpark and queue
    */
-  public int totalCars() {
+  public synchronized int totalCars() {
     return this.park.getParkedCars() + this.park.queue.size();
   }
 }
