@@ -22,9 +22,9 @@ class Car {
   /**
    * Check if the Car is double parked
    *
-   * @return <tt>false</tt> only if the car is double parked
+   * @return <tt>true</tt> only if the car is double parked
    */
-  public boolean getConsiderate() {
-    return this.considerate;
+  public boolean isDoubleParked() {
+    return !this.considerate;
   }
 }

@@ -41,6 +41,15 @@ class CarPark {
   }
 
   /**
+   * Check if the CarPark is full
+   *
+   * @return boolean true if carpark is full
+   */
+  public synchronized boolean full() {
+    return this.occupied >= this.parkSize;
+  }
+
+  /**
    * Remove a random Car from the carpark.
    *
    * <p>Decrease a number of spaces occupied.
@@ -49,15 +58,13 @@ class CarPark {
     Random rand = new Random();
     int index = rand.nextInt(occupied);
     Car leaver = spaces.get(index);
-    if (leaver.getConsiderate()) {
+    if (!leaver.isDoubleParked()) {
       spaces.remove(index);
       occupied--;
     } else {
       // Driver is occupying two spaces
       spaces.remove(index);
-      // We've freed one of the spaces they occupied, we must free a second
-      index = findAsshole();
-      spaces.remove(index);
+      spaces.remove(findAsshole());
       occupied -= 2;
     }
   }
@@ -65,21 +72,29 @@ class CarPark {
   /**
    * Used to find a second space when someone is parked over two spaces
    *
+   * <p>Will return first car if it cant find second car
+   *
    * @return int of postion of a random double parked space
    */
   private int findAsshole() {
     for (int i = 0; i < spaces.size(); i++) {
-      Car check = spaces.get(i);
-      if (!check.getConsiderate()) return i;
+      if (spaces.get(i).isDoubleParked()) return i;
     }
-    // We've somehow managed to get to the end without finding the pair,
-    // remove the first car in the car park
     return 0;
+  }
+
+  /**
+   * check if carpark is empty
+   *
+   * @return true if car is empty
+   */
+  public boolean empty() {
+    return this.occupied == 0;
   }
 
   /** remove a car from the carpark if its not empty */
   public synchronized void leave() {
-    while (occupied == 0) {
+    while (this.empty()) {
       try {
         wait();
       } catch (InterruptedException e) {
@@ -92,20 +107,25 @@ class CarPark {
   /**
    * Look for a free space to put a car
    *
-   * <p>randomly double parks car
+   * @param c car to park
    */
-  public synchronized void lookForSpace() {
-    Random generator = new Random();
-    int check = generator.nextInt(50);
-    if (check == 25) {
-      queue.addCar(new Car(false));
-    } else {
-      queue.addCar(new Car(true));
-    }
+  public synchronized void lookForSpace(Car c) {
+    queue.addCar(c);
   }
 
   /** Park a car if the carark isnt full and add to the queue if it is */
-  public synchronized void park() {}
+  public synchronized void park() {
+    while (this.full()) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+      }
+    }
+    if (queue.getNumWaiting() > 0) {
+      addCar(queue.removeCar());
+    }
+    notifyAll();
+  }
 
   /**
    * Add car to array of spaces
@@ -113,7 +133,7 @@ class CarPark {
    * @param visitor (required) car to be added to the spaces array
    */
   private void addCar(Car visitor) {
-    if (!visitor.getConsiderate()) {
+    if (visitor.isDoubleParked()) {
       // Driver is parked across two spaces
       spaces.add(visitor);
       spaces.add(visitor);
@@ -154,8 +174,7 @@ class CarPark {
   public synchronized int getParkedCars() {
     int doubleParked = 0;
     for (int i = 0; i < spaces.size(); i++) {
-      Car check = spaces.get(i);
-      if (!check.getConsiderate()) {
+      if (spaces.get(i).isDoubleParked()) {
         doubleParked++;
       }
     }

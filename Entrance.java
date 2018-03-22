@@ -11,7 +11,7 @@ class Entrance extends Thread {
   private CarPark carPark;
   private Clock clock;
   private int number;
-  private boolean start;
+  private boolean start = false;
 
   /**
    * Constructor
@@ -45,32 +45,30 @@ class Entrance extends Thread {
   @Override
   public void run() {
     this.start = true;
+    Random rand = new Random();
     while (this.start) {
-      if (carPark.getTotalCars() > carPark.getSize()) {
+      int overflow = carPark.getTotalCars() - carPark.getSize();
+      if (overflow > 0) {
         // More cars than spaces
-        int overflow = carPark.getTotalCars() - carPark.getSize();
         float entryChance = 1 / overflow;
-        Random gate = new Random();
-        if (entryChance > gate.nextFloat()) {
+        if (entryChance > rand.nextFloat()) {
           // Chance of entry decreases the more overflow there is
-          carPark.lookForSpace();
+          this.carPark.lookForSpace(new Car(21 != rand.nextInt(50)));
         }
       } else {
-        carPark.lookForSpace();
-      }
-      Random rand = new Random();
-      int sleep;
-      if (clock.isMorningRush()) {
-        // Increase number of cars trying to leave during the morning rush
-        sleep = (rand.nextInt(150) + 1);
-      } else if (clock.isEveningRush()) {
-        // Less cars will try to enter during evening rush
-        sleep = 1000 * (rand.nextInt(clock.getHour() + 1) + 1);
-      } else {
-        sleep = 100 * (rand.nextInt(clock.getHour() + 1) + 1);
+        this.carPark.lookForSpace(new Car(21 != rand.nextInt(50)));
       }
       try {
-        sleep(Math.abs(sleep));
+        Thread.sleep(
+            Math.abs(
+                (clock.isMorningRush())
+                    // Increase number of cars trying to enter during the morning rush
+                    ? (rand.nextInt(150) + 1)
+                    : (clock.isEveningRush())
+                        ?
+                        // Less cars will try to enter during evening rush
+                        1000 * (rand.nextInt(clock.getHour() + 1) + 1)
+                        : 100 * (rand.nextInt(clock.getHour() + 1) + 1)));
       } catch (InterruptedException e) {
       }
     }

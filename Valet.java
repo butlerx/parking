@@ -1,3 +1,5 @@
+import javax.swing.JLabel;
+
 /**
  * Valet class for removing cars from queue and parking them int the car Park
  *
@@ -7,17 +9,26 @@
  */
 class Valet extends Thread {
   private WaitManager queue;
-  private boolean start;
+  private boolean start = false;
   private CarPark park;
+  private JLabel carsLabel;
+  private JLabel spacesLabel;
+  private JLabel parkedLabel;
+  private JLabel queueLabel;
 
   /**
    * Constructor
    *
    * @param park (required) the Car park to park in
    */
-  public Valet(CarPark park) {
+  public Valet(
+      CarPark park, JLabel carsLabel, JLabel spacesLabel, JLabel parkedLabel, JLabel queueLabel) {
     this.queue = park.getQueue();
     this.park = park;
+    this.carsLabel = carsLabel;
+    this.spacesLabel = spacesLabel;
+    this.parkedLabel = parkedLabel;
+    this.queueLabel = queueLabel;
   }
 
   /** stop the process in the thread */
@@ -29,15 +40,15 @@ class Valet extends Thread {
   @Override
   public void run() {
     this.start = true;
-    while (this.start && occupied >= this.parkSize) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-      }
+    while (this.start) {
+      park.park();
+      this.carsLabel.setText(
+          "There are currently " + this.park.getTotalCars() + " Cars in the Carpark");
+      this.spacesLabel.setText(
+          "There are currently " + this.park.getSpaces() + " Spaces in the Carpark");
+      this.parkedLabel.setText("There are currently " + this.park.getParkedCars() + " Cars parked");
+      this.queueLabel.setText(
+          "There are currently " + this.queue.getNumWaiting() + " Cars searching for a space");
     }
-    if (queue.getNumWaiting() > 0) {
-      addCar(queue.removeCar());
-    }
-    notifyAll();
   }
 }

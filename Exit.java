@@ -1,4 +1,5 @@
 import java.util.*;
+import javax.swing.JLabel;
 
 /**
  * Exit class for letting cars leave the carpark
@@ -8,10 +9,11 @@ import java.util.*;
  * @since 1.0
  */
 class Exit extends Thread {
+  private JLabel display;
   private CarPark carPark;
   private Clock clock;
   private int number;
-  private boolean obstruction;
+  private boolean obstruction = false;
   private boolean start;
 
   /**
@@ -20,11 +22,13 @@ class Exit extends Thread {
    * @param c (required) The car park to remove cars from
    * @param i (required) The exit number should be unique
    * @param cl (required) The shared clock between all the threads
+   * @param label (required) label to output too
    */
-  public Exit(CarPark c, int i, Clock cl) {
-    carPark = c;
+  public Exit(CarPark c, int i, Clock cl, JLabel label) {
+    this.carPark = c;
     this.number = i;
-    clock = cl;
+    this.clock = cl;
+    this.display = label;
   }
 
   /**
@@ -55,32 +59,26 @@ class Exit extends Thread {
   @Override
   public void run() {
     this.start = true;
+    Random delay = new Random();
     while (this.start) {
-      carPark.leave();
-      Random delay = new Random();
-      int check = delay.nextInt(50);
-      if (check == 25) {
-        // Car is delayed, check for how long
-        int delayTime = delay.nextInt(5000);
-        try {
-          this.obstruction = true;
-          sleep(delayTime);
-        } catch (InterruptedException e) {
-        }
-      }
-      this.obstruction = false;
-      int sleep;
-      if (clock.isEveningRush()) {
-        // Increase number of cars trying to leave during the Evening rush
-        sleep = (delay.nextInt(150) + 1);
-      } else if (clock.isMorningRush()) {
-        // Less Cars will be trying to leave during the morning rush
-        sleep = 1000 * (delay.nextInt(24 - clock.getHour()) + 1);
-      } else {
-        sleep = 100 * (delay.nextInt(24 - clock.getHour()) + 1);
-      }
+      this.carPark.leave();
       try {
-        sleep(sleep);
+        if (delay.nextInt(50) == 21) {
+          // Car is delayed, check for how long
+          this.display.setText("exit " + this.number + "obstructed");
+          Thread.sleep(delay.nextInt(5000));
+          this.display.setText("No obstructions at Exit " + this.number);
+        }
+        Thread.sleep(
+            Math.abs(
+                (clock.isEveningRush())
+                    // Increase number of cars trying to leave during the Evening rush
+                    ? (delay.nextInt(150) + 1)
+                    : (clock.isMorningRush())
+                        ?
+                        // Less Cars will be trying to leave during the morning rush
+                        1000 * (delay.nextInt(24 - clock.getHour()) + 1)
+                        : 100 * (delay.nextInt(24 - clock.getHour()) + 1)));
       } catch (InterruptedException e) {
       }
     }

@@ -1,9 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.Timer;
 
 /**
  * Car park simulator
@@ -16,61 +14,55 @@ import javax.swing.Timer;
  */
 public class Parking {
 
-  private JFrame mainFrame;
-  private JLabel headerLabel;
-  private JLabel spacesLabel;
-  private JLabel carsLabel;
-  private JLabel parkedLabel;
-  private JLabel queueLabel;
-  private JLabel delayLabel;
-  private JPanel controlPanel;
-  private CarPark multiStory = new CarPark(1000);
+  private final JFrame mainFrame = new JFrame("Carpark");
+  private final JLabel headerLabel = new JLabel("CarPark", JLabel.CENTER);
+  private final JPanel controlPanel = new JPanel();
+  private JLabel carsLabel = new JLabel("There are currently 0 Cars in the Carpark", JLabel.CENTER);
+  private JLabel spacesLabel =
+      new JLabel("There are currently 1000 Spaces in the Carpark", JLabel.CENTER);
+  private JLabel queueLabel =
+      new JLabel("There are currently 0 Cars searching for a space", JLabel.CENTER);
+  private JLabel parkedLabel = new JLabel("There are currently 0 Cars parked", JLabel.CENTER);
+  private JLabel Exit1Label = new JLabel("No obstructions at Exit 1", JLabel.CENTER);
+  private JLabel Exit2Label = new JLabel("No obstructions at Exit 2", JLabel.CENTER);
+  private JLabel Exit3Label = new JLabel("No obstructions at Exit 3", JLabel.CENTER);
 
-  private Clock clock = new Clock(multiStory);
-  private Entrance in1 = new Entrance(multiStory, 1, clock);
-  private Entrance in2 = new Entrance(multiStory, 2, clock);
-  private Entrance in3 = new Entrance(multiStory, 3, clock);
-  private Exit out1 = new Exit(multiStory, 1, clock);
-  private Exit out2 = new Exit(multiStory, 2, clock);
-  private Exit out3 = new Exit(multiStory, 3, clock);
-  private Valet wait1 = new Valet(multiStory.getQueue(), multiStory);
-  private Valet wait2 = new Valet(multiStory.getQueue(), multiStory);
-  private Valet wait3 = new Valet(multiStory.getQueue(), multiStory);
+  private final CarPark multiStory = new CarPark(1000);
 
-  private static DecimalFormat df = new DecimalFormat("00");
-
-  /** Constructor. */
-  public Parking() {
-    prepareGUI();
-  }
+  private final Clock clock = new Clock(headerLabel);
+  private final Entrance in1 = new Entrance(multiStory, 1, clock);
+  private final Entrance in2 = new Entrance(multiStory, 2, clock);
+  private final Entrance in3 = new Entrance(multiStory, 3, clock);
+  private final Exit out1 = new Exit(multiStory, 1, clock, Exit1Label);
+  private final Exit out2 = new Exit(multiStory, 2, clock, Exit2Label);
+  private final Exit out3 = new Exit(multiStory, 3, clock, Exit3Label);
+  private final Valet wait1 =
+      new Valet(multiStory, carsLabel, spacesLabel, parkedLabel, queueLabel);
+  private final Valet wait2 =
+      new Valet(multiStory, carsLabel, spacesLabel, parkedLabel, queueLabel);
+  private final Valet wait3 =
+      new Valet(multiStory, carsLabel, spacesLabel, parkedLabel, queueLabel);
 
   /** main method */
   public static void main(String[] args) {
     Parking carParkOverView = new Parking();
-    carParkOverView.showDashboard();
   }
 
   /**
-   * Prepare the User dashboard of information and controls
+   * Constructor. Prepare the User dashboard of information and controls
    *
    * @see javax.swing
    */
-  private void prepareGUI() {
-    mainFrame = new JFrame("Carpark");
+  public Parking() {
     mainFrame.setSize(400, 400);
     mainFrame.setLayout(new GridLayout(4, 1));
-
-    headerLabel = new JLabel("CarPark", JLabel.CENTER);
-    carsLabel = new JLabel("", JLabel.CENTER);
-    spacesLabel = new JLabel("", JLabel.CENTER);
-    queueLabel = new JLabel("", JLabel.CENTER);
-    parkedLabel = new JLabel("", JLabel.CENTER);
-    delayLabel = new JLabel("No obstructions at the gates", JLabel.CENTER);
     spacesLabel.setSize(350, 100);
     carsLabel.setSize(350, 100);
     queueLabel.setSize(350, 100);
     parkedLabel.setSize(350, 100);
-    delayLabel.setSize(350, 100);
+    Exit1Label.setSize(115, 100);
+    Exit2Label.setSize(115, 100);
+    Exit3Label.setSize(115, 100);
 
     mainFrame.addWindowListener(
         new WindowAdapter() {
@@ -78,7 +70,6 @@ public class Parking {
             System.exit(0);
           }
         });
-    controlPanel = new JPanel();
     controlPanel.setLayout(new FlowLayout());
 
     mainFrame.add(headerLabel);
@@ -86,114 +77,54 @@ public class Parking {
     mainFrame.add(carsLabel);
     mainFrame.add(queueLabel);
     mainFrame.add(parkedLabel);
-    mainFrame.add(delayLabel);
     mainFrame.add(controlPanel);
+    mainFrame.add(Exit1Label);
+    mainFrame.add(Exit2Label);
+    mainFrame.add(Exit3Label);
     mainFrame.setVisible(true);
-  }
 
-  /** Show Dashboard to user */
-  private void showDashboard() {
     JButton runButton = new JButton("Run");
     JButton stopButton = new JButton("Stop");
     JButton exitButton = new JButton("Exit");
-    runButton.setActionCommand("Run");
-    stopButton.setActionCommand("Stop");
-    exitButton.setActionCommand("Exit");
-    runButton.addActionListener(new ButtonClickListener());
-    stopButton.addActionListener(new ButtonClickListener());
-    exitButton.addActionListener(new ButtonClickListener());
+    runButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            clock.start();
+            in1.start();
+            in2.start();
+            in3.start();
+            wait1.start();
+            wait2.start();
+            wait3.start();
+            out1.start();
+            out2.start();
+            out3.start();
+          }
+        });
+    stopButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            clock.kill();
+            in1.kill();
+            in2.kill();
+            in3.kill();
+            wait1.kill();
+            wait2.kill();
+            wait3.kill();
+            out1.kill();
+            out2.kill();
+            out3.kill();
+          }
+        });
+    exitButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            System.exit(0);
+          }
+        });
     controlPanel.add(runButton);
     controlPanel.add(stopButton);
     controlPanel.add(exitButton);
     mainFrame.setVisible(true);
-    stats.start();
-  }
-
-  /**
-   * Display status of exits
-   *
-   * @return String of the current status of the exits
-   */
-  private String checkExits() {
-    if (!out1.checkObstruction() && !out2.checkObstruction() && !out3.checkObstruction()) {
-      return "No obstructions at the gates";
-    } else {
-      String status = "There is a car currently stuck at a exit: ";
-      if (out1.checkObstruction()) {
-        status = status + "#1";
-      }
-      if (out2.checkObstruction()) {
-        if (status.contains("#")) {
-          status = status + ", #2";
-        } else {
-          status = status + "#2";
-        }
-      }
-      if (out3.checkObstruction()) {
-        if (status.contains("#")) {
-          status = status + ", #3";
-        } else {
-          status = status + "#3";
-        }
-      }
-      return status;
-    }
-  }
-
-  /** Timer to refresh Dashboard every second with current information from the carpark */
-  Timer stats =
-      new Timer(
-          1000,
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              headerLabel.setText(
-                  "The time in the CarPark is "
-                      + df.format(clock.getHour())
-                      + ":"
-                      + df.format(clock.getTime()));
-              carsLabel.setText(
-                  "There are currently " + multiStory.getTotalCars() + " Cars in the Carpark");
-              spacesLabel.setText(
-                  "There are currently " + multiStory.getSpaces() + " Spaces in the Carpark");
-              parkedLabel.setText(
-                  "There are currently " + multiStory.getParkedCars() + " Cars parked");
-              queueLabel.setText(
-                  "There are currently "
-                      + multiStory.getQueue().getNumWaiting()
-                      + " Cars searching for a space");
-              delayLabel.setText(checkExits());
-            }
-          });
-
-  /** Listen for button click to start and stop threads */
-  private class ButtonClickListener implements ActionListener {
-    public void actionPerformed(ActionEvent e) {
-      String command = e.getActionCommand();
-      if (command.equals("Run")) {
-        clock.start();
-        in1.start();
-        in2.start();
-        in3.start();
-        wait1.start();
-        wait2.start();
-        wait3.start();
-        out1.start();
-        out2.start();
-        out3.start();
-      } else if (command.equals("Stop")) {
-        clock.kill();
-        in1.kill();
-        in2.kill();
-        in3.kill();
-        wait1.kill();
-        wait2.kill();
-        wait3.kill();
-        out1.kill();
-        out2.kill();
-        out3.kill();
-      } else {
-        System.exit(0);
-      }
-    }
   }
 }

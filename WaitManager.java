@@ -8,12 +8,7 @@ import java.util.*;
  * @since 1.0
  */
 class WaitManager {
-  private ArrayList<Car> waiting;
-
-  /** Construtor */
-  public WaitManager() {
-    this.waiting = new ArrayList<Car>();
-  }
+  private ArrayList<Car> waiting = new ArrayList<Car>();;
 
   /**
    * Add car to queue

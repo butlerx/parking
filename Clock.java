@@ -1,4 +1,6 @@
+import java.text.DecimalFormat;
 import java.util.stream.IntStream;
+import javax.swing.JLabel;
 
 /**
  * Clock class for keeping track of time in the carpark
@@ -8,21 +10,22 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 class Clock extends Thread {
-  private CarPark carPark;
-  private boolean start;
+  private JLabel display;
+  private boolean start = false;
   // Time is 10 minute
   private int time = 0;
-  private int hour = 0;
-  private int[] morningRush = {7, 8, 9};
-  private int[] eveningRush = {17, 18, 19};
+  private int _hour = 0;
+  private final int[] morningRush = {7, 8, 9};
+  private final int[] eveningRush = {17, 18, 19};
+  private final DecimalFormat df = new DecimalFormat("00");
 
   /**
    * Constructor
    *
-   * @param c (required) The car park to track time in
+   * @param label (required) label to output info too
    */
-  public Clock(CarPark c) {
-    carPark = c;
+  public Clock(JLabel label) {
+    this.display = label;
   }
 
   /**
@@ -30,8 +33,8 @@ class Clock extends Thread {
    *
    * @return int of minutes passed
    */
-  public int getTime() {
-    return (this.time % 6) * 10;
+  public int getMinutes() {
+    return (this.time % 60);
   }
 
   /**
@@ -40,15 +43,7 @@ class Clock extends Thread {
    * @return int of hours passed
    */
   public int getHour() {
-    return this.hour % 24;
-  }
-
-  /** increment the time by 10 minutes */
-  public void passTime() {
-    this.time++;
-    if (this.time % 6 == 0) {
-      this.hour++;
-    }
+    return this._hour % 24;
   }
 
   /**
@@ -57,7 +52,7 @@ class Clock extends Thread {
    * @return true if it is the morning rush
    */
   public boolean isMorningRush() {
-    return IntStream.of(this.morningRush).anyMatch(x -> x == this.hour);
+    return IntStream.of(this.morningRush).anyMatch(x -> x == this.getHour());
   }
 
   /**
@@ -66,7 +61,7 @@ class Clock extends Thread {
    * @return true if it is the evening rush
    */
   public boolean isEveningRush() {
-    return IntStream.of(this.eveningRush).anyMatch(x -> x == this.hour);
+    return IntStream.of(this.eveningRush).anyMatch(x -> x == this.getHour());
   }
 
   /** stop the process in the thread */
@@ -83,11 +78,19 @@ class Clock extends Thread {
   public void run() {
     this.start = true;
     while (this.start) {
-      passTime();
+      this.time += 1;
+      if (this.time % 60 == 0) {
+        this._hour += 1;
+      }
       try {
+        this.display.setText(
+            "The time in the CarPark is "
+                + df.format(this.getHour())
+                + ":"
+                + df.format((this.getMinutes())));
         // 1000 is 1 second real time
         // 1 second real time is 10 min in simulation
-        sleep((1000));
+        sleep((100));
       } catch (InterruptedException e) {
       }
     }
