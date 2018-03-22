@@ -1,11 +1,11 @@
 /**
- * Parker class for removeing cars from queue and parking them int the car Park
+ * Valet class for removing cars from queue and parking them int the car Park
  *
  * @author Cian Butler <cian.butler25@mail.dcu.ie>, Eanna Byrne <eanna.byrne76@mail.dcu.ie>
  * @version 1.0
  * @since 1.0
  */
-class Parker extends Thread {
+class Valet extends Thread {
   private WaitManager queue;
   private boolean start;
   private CarPark park;
@@ -13,11 +13,10 @@ class Parker extends Thread {
   /**
    * Constructor
    *
-   * @param queue (required) the queue to take cars from
    * @param park (required) the Car park to park in
    */
-  public Parker(WaitManager queue, CarPark park) {
-    this.queue = queue;
+  public Valet(CarPark park) {
+    this.queue = park.getQueue();
     this.park = park;
   }
 
@@ -30,8 +29,15 @@ class Parker extends Thread {
   @Override
   public void run() {
     this.start = true;
-    while (this.start) {
-      park.park();
+    while (this.start && occupied >= this.parkSize) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+      }
     }
+    if (queue.getNumWaiting() > 0) {
+      addCar(queue.removeCar());
+    }
+    notifyAll();
   }
 }

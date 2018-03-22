@@ -8,9 +8,9 @@ import java.util.*;
  * @since 1.0
  */
 class CarPark {
-  private ArrayList<Car> spaces;
-  private WaitManager queue;
-  private int occupied;
+  private ArrayList<Car> spaces = new ArrayList<Car>();
+  private WaitManager queue = new WaitManager();
+  private int occupied = 0;
   private int parkSize;
 
   /**
@@ -19,9 +19,6 @@ class CarPark {
    * @param size (required) capacity of carpark
    */
   public CarPark(int size) {
-    this.spaces = new ArrayList<Car>();
-    this.queue = new WaitManager();
-    this.occupied = 0;
     this.parkSize = size;
   }
 
@@ -73,9 +70,7 @@ class CarPark {
   private int findAsshole() {
     for (int i = 0; i < spaces.size(); i++) {
       Car check = spaces.get(i);
-      if (!check.getConsiderate()) {
-        return i;
-      }
+      if (!check.getConsiderate()) return i;
     }
     // We've somehow managed to get to the end without finding the pair,
     // remove the first car in the car park
@@ -110,18 +105,7 @@ class CarPark {
   }
 
   /** Park a car if the carark isnt full and add to the queue if it is */
-  public synchronized void park() {
-    while (occupied >= this.parkSize) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-      }
-    }
-    if (queue.getNumWaiting() > 0) {
-      addCar(queue.removeCar());
-    }
-    notifyAll();
-  }
+  public synchronized void park() {}
 
   /**
    * Add car to array of spaces

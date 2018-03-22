@@ -33,9 +33,9 @@ public class Parking {
   private Exit out1 = new Exit(multiStory, 1, clock);
   private Exit out2 = new Exit(multiStory, 2, clock);
   private Exit out3 = new Exit(multiStory, 3, clock);
-  private Parker wait1 = new Parker(multiStory.getQueue(), multiStory);
-  private Parker wait2 = new Parker(multiStory.getQueue(), multiStory);
-  private Parker wait3 = new Parker(multiStory.getQueue(), multiStory);
+  private Valet wait1 = new Valet(multiStory.getQueue(), multiStory);
+  private Valet wait2 = new Valet(multiStory.getQueue(), multiStory);
+  private Valet wait3 = new Valet(multiStory.getQueue(), multiStory);
 
   private static DecimalFormat df = new DecimalFormat("00");
 
