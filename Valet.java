@@ -21,8 +21,13 @@ class Valet extends SwingWorker<Integer, Void> {
    *
    * @param park (required) the Car park to park in
    */
-  public Valet(CarPark park) {
+  public Valet(
+      CarPark park, JLabel carsLabel, JLabel spacesLabel, JLabel parkedLabel, JLabel queueLabel) {
     this.park = park;
+    this.carsLabel = carsLabel;
+    this.spacesLabel = spacesLabel;
+    this.parkedLabel = parkedLabel;
+    this.queueLabel = queueLabel;
   }
 
   /**
@@ -51,18 +56,30 @@ class Valet extends SwingWorker<Integer, Void> {
   /** update the interface */
   @Override
   protected Integer doInBackground() throws Exception {
-    System.out.println(this.park.queue.size() + " " + this.isCancelled());
     while (!this.isCancelled()) {
-      System.out.println(this.park.queue.size());
-      this.park.addCar(this.park.queue.poll());
-      this.carsLabel.setText("There are currently " + this.totalCars() + " Cars in the Carpark");
-      this.spacesLabel.setText(
-          "There are currently " + this.park.getSpaces() + " Spaces in the Carpark");
-      this.parkedLabel.setText("There are currently " + this.park.getParkedCars() + " Cars parked");
-      this.queueLabel.setText(
-          "There are currently " + this.park.queue.size() + " Cars searching for a space");
+      this.refresh();
+      while (this.park.full()) {
+        this.refresh();
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+      }
+      if (this.park.queue.size() > 0) {
+        this.park.addCar(this.park.queue.poll());
+      }
     }
     return 0;
+  }
+
+  /** fresh the ui with new stats */
+  private void refresh() {
+    this.carsLabel.setText("There are currently " + this.totalCars() + " Cars in the Carpark");
+    this.spacesLabel.setText(
+        "There are currently " + this.park.getSpaces() + " Spaces in the Carpark");
+    this.parkedLabel.setText("There are currently " + this.park.getParkedCars() + " Cars parked");
+    this.queueLabel.setText(
+        "There are currently " + this.park.queue.size() + " Cars searching for a space");
   }
 
   /**

@@ -127,4 +127,13 @@ class CarPark {
     }
     return this.occupied - (doubleParked / 2);
   }
+
+  /**
+   * Check if the CarPark is full
+   *
+   * @return boolean true if carpark is full
+   */
+  public synchronized boolean full() {
+    return this.occupied >= this.parkSize;
+  }
 }

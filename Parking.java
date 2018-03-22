@@ -36,27 +36,21 @@ public class Parking {
   private Entrance in1;
   private Entrance in2;
   private Entrance in3;
-  private ParkExit out1;
-  private ParkExit out2;
-  private ParkExit out3;
-
-  /** Constructor. */
-  public Parking() {
-    prepareGUI();
-  }
+  private Exit out1;
+  private Exit out2;
+  private Exit out3;
 
   /** main method */
   public static void main(String[] args) {
     Parking carParkOverView = new Parking();
-    carParkOverView.showDashboard();
   }
 
   /**
-   * Prepare the User dashboard of information and controls
+   * Constructor Prepare the User dashboard of information and controls
    *
    * @see javax.swing
    */
-  private void prepareGUI() {
+  public Parking() {
     this.mainFrame.setSize(400, 400);
     this.mainFrame.setLayout(new GridLayout(4, 1));
 
@@ -85,68 +79,59 @@ public class Parking {
     mainFrame.add(Exit3Label);
     mainFrame.add(controlPanel);
     mainFrame.setVisible(true);
-  }
 
-  /** Show Dashboard to user */
-  private void showDashboard() {
     JButton runButton = new JButton("Run");
     JButton stopButton = new JButton("Stop");
     JButton exitButton = new JButton("Exit");
-    runButton.addActionListener(new Run());
-    stopButton.addActionListener(new Stop());
-    exitButton.addActionListener(new Exit());
+    runButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            if (state != "running") {
+              state = "running";
+              valet = new Valet(carpark, carsLabel, spacesLabel, parkedLabel, queueLabel);
+              clock = new Clock(headerLabel, seed);
+              in1 = new Entrance(valet, 1, clock);
+              in2 = new Entrance(valet, 2, clock);
+              in3 = new Entrance(valet, 3, clock);
+              out1 = new Exit(valet, 1, clock, Exit1Label);
+              out2 = new Exit(valet, 2, clock, Exit2Label);
+              out3 = new Exit(valet, 3, clock, Exit3Label);
+              valet.execute();
+              clock.execute();
+              in1.execute();
+              in2.execute();
+              in3.execute();
+              out1.execute();
+              out2.execute();
+              out3.execute();
+            }
+          }
+        });
+    stopButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            if (state == "running") {
+              state = "";
+              clock.cancel(false);
+              valet.cancel(false);
+              in1.cancel(true);
+              in2.cancel(true);
+              in3.cancel(true);
+              out1.cancel(true);
+              out2.cancel(true);
+              out3.cancel(true);
+            }
+          }
+        });
+    exitButton.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            System.exit(0);
+          }
+        });
     controlPanel.add(runButton);
     controlPanel.add(stopButton);
     controlPanel.add(exitButton);
     mainFrame.setVisible(true);
-  }
-
-  /** Listen for button click to exit */
-  private class Exit implements ActionListener {
-    public void actionPerformed(ActionEvent e) {
-      System.exit(0);
-    }
-  }
-
-  /** Listen for button click to start threads */
-  private class Run implements ActionListener {
-    public void actionPerformed(ActionEvent e) {
-      if (state != "running") {
-        state = "running";
-        valet = new Valet(carpark);
-        clock = new Clock(headerLabel, seed);
-        in1 = new Entrance(valet, 1, clock);
-        in2 = new Entrance(valet, 2, clock);
-        in3 = new Entrance(valet, 3, clock);
-        out1 = new ParkExit(valet, 1, clock, Exit1Label);
-        out2 = new ParkExit(valet, 2, clock, Exit2Label);
-        out3 = new ParkExit(valet, 3, clock, Exit3Label);
-        valet.execute();
-        clock.execute();
-        in1.execute();
-        in2.execute();
-        in3.execute();
-        out1.execute();
-        out2.execute();
-        out3.execute();
-      }
-    }
-  }
-
-  /** Listen for button click to stop threads */
-  private class Stop implements ActionListener {
-    public void actionPerformed(ActionEvent e) {
-      if (state == "running") {
-        state = "";
-        clock.cancel(false);
-        valet.cancel(false);
-        in1.cancel(true);
-        in2.cancel(true);
-        in3.cancel(true);
-        out1.cancel(true);
-        out2.cancel(true);
-        out3.cancel(true);
-      }
-    }
   }
 }

@@ -9,7 +9,7 @@ import javax.swing.SwingWorker;
  * @version 2.0
  * @since 1.0
  */
-class ParkExit extends SwingWorker<Integer, String> {
+class Exit extends SwingWorker<Integer, String> {
   private JLabel display;
   private Valet valet;
   private Clock clock;
@@ -22,7 +22,7 @@ class ParkExit extends SwingWorker<Integer, String> {
    * @param i (required) The exit number should be unique
    * @param cl (required) The shared clock between all the threads
    */
-  public ParkExit(Valet v, int i, Clock cl, JLabel label) {
+  public Exit(Valet v, int i, Clock cl, JLabel label) {
     this.display = label;
     this.valet = v;
     this.clock = cl;
@@ -49,8 +49,9 @@ class ParkExit extends SwingWorker<Integer, String> {
       try {
         if (delay.nextInt(50) == 21) {
           // Car is delayed, check for how long
-          this.display.setText("exit " + this.number + "obstructed");
+          this.display.setText("exit " + this.number + " obstructed");
           Thread.sleep(delay.nextInt(5000));
+          this.display.setText("No obstructions at Exit " + this.number);
         }
         Thread.sleep(
             Math.abs(
