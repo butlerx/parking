@@ -16,10 +16,8 @@ import javax.swing.SwingWorker
  */
 internal class Clock (
     private val display: JLabel,
-    private val seed: Seed
+    private val time: Seed
 ) : SwingWorker<Boolean, Void>() {
-    private var time = 0
-    private var _hour = 0
     private val df = DecimalFormat("00")
 
     /**
@@ -28,7 +26,7 @@ internal class Clock (
      * @return int of minutes passed
      */
     val minutes: Int
-        get() = this.time % 60
+        get() = this.time.min % 60
 
     /**
      * Checks the hours passed
@@ -36,7 +34,7 @@ internal class Clock (
      * @return int of hours passed
      */
     val hour: Int
-        get() = this._hour % 24
+        get() = this.time.hour % 24
 
     /**
      * Check if it is the morning Rush
@@ -55,12 +53,8 @@ internal class Clock (
         get() = IntStream.of(17, 18, 19).anyMatch({ x -> x == this.hour })
 
     class Seed {
-        var time = 0
-    }
-
-    init {
-        this.time = seed.time % 60
-        this._hour = (seed.time - this.time) / 60
+        var min = 0
+        var hour = 0
     }
 
     /**
@@ -71,11 +65,10 @@ internal class Clock (
     @Throws(Exception::class)
     protected override fun doInBackground(): Boolean {
         while (!this.isCancelled()) {
-            this.time += 1
-            if (this.time % 60 == 0) {
-                this._hour += 1
+            this.time.min += 1
+            if (this.time.min % 60 == 0) {
+                this.time.hour += 1
             }
-            this.seed.time = this._hour * 60 + this.time
             try {
                 this.display.setText(
                         "The time in the CarPark is " +
